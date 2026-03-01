@@ -1,12 +1,7 @@
 {
   "name": "range-slider-card",
-  "content_in_root": true,
-  "filename": [
-	"range-slider-card.js",
-	"range-slider-class.js",
-	"frontend/nouislider.min.css",
-	"frontend/nouislider.min.js"
-  ],
+  "content_in_root": false,
+  "filename": "dist/range-slider-card.js",
   "homeassistant": "2025.1.0",
   "render_readme": true
 }
