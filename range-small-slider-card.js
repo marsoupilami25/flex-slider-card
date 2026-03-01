@@ -5,7 +5,7 @@ class RangeSmallSliderCard extends RangeSliderClass {
   _renderTemplate(name) {
     this.shadowRoot.innerHTML = `
       <style>
-        @import "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css";
+        @import "/local/community/range-slider-card/frontend/nouislider.min.css";
         .container {
           display: flex;
           flex-direction: column;

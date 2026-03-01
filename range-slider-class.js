@@ -8,6 +8,8 @@ export class RangeSliderClass extends HTMLElement {
     ERROR: 4
   });
 
+  static _nouiPromise = null;
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -101,7 +103,7 @@ export class RangeSliderClass extends HTMLElement {
   }
 
   _initPrivateDisplayData() {
-    this._activeDebug = true;
+    this._activeDebug = false;
     this._debuglog("DISCONNECTED");
     this._state = RangeSliderClass.State.DISCONNECTED;
     this._userIsUpdating = false;
@@ -317,15 +319,30 @@ export class RangeSliderClass extends HTMLElement {
   }
 
   _loadNoUiSlider() {
-    if (!window.noUiSlider) {
-      return new Promise((resolve) => {
-        const script = document.createElement('script');
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js";
-        script.onload = () => resolve(window.noUiSlider);
-        document.head.appendChild(script);
-      });
-    }
-    return window.noUiSlider;
+    // already loaded
+    if (window.noUiSlider)
+      return Promise.resolve(window.noUiSlider);
+    if (RangeSliderClass._nouiPromise)
+      return RangeSliderClass._nouiPromise;
+    
+    // Charger le JS
+    const jsUrl = "/local/community/range-slider-card/frontend/nouislider.min.js";
+    RangeSliderClass._nouiPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = jsUrl;
+      script.async = true;
+      script.onload = () => {
+        if (!window.noUiSlider) {
+          reject(new Error("noUiSlider loaded but window.noUiSlider is undefined"));
+          return;
+        }
+        resolve(window.noUiSlider);
+      };
+      script.onerror = () => reject(new Error(`Impossible to load ${jsUrl}`));
+      document.head.appendChild(script);
+    });
+
+    return RangeSliderClass._nouiPromise;
   }
 
 }
