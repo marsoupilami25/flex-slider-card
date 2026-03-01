@@ -1,0 +1,29 @@
+{
+  "name": "range-slider-card",
+  "version": "0.1.0",
+  "description": "A slider **custom card** for Home Assistant.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marsoupilami25/range-slider-card.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/marsoupilami25/range-slider-card/issues"
+  },
+  "homepage": "https://github.com/marsoupilami25/range-slider-card#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "nouislider": "^15.8.1"
+  }
+}
