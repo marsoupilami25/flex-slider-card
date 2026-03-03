@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "vite build",
+    "deploy": "scp -r dist/* ha:/root/config/www/community/range-slider-card/",
+    "all": "npm run build && npm run deploy",
     "dev": "vite"
   },
   "repository": {
