@@ -5,7 +5,7 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: "src/flex-slider-card.js",
-      name: "RangeSliderCard",
+      name: "FlexSliderCard",
       formats: ["es"],
       fileName: () => "flex-slider-card.js",
     },
