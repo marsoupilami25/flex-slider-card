@@ -4,10 +4,10 @@ export default defineConfig({
   build: {
     minify: false,
     lib: {
-      entry: "src/range-slider-card.js",
+      entry: "src/flex-slider-card.js",
       name: "RangeSliderCard",
       formats: ["es"],
-      fileName: () => "range-slider-card.js",
+      fileName: () => "flex-slider-card.js",
     },
     rollupOptions: {
       external: [],

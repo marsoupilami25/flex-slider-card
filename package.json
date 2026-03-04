@@ -1,5 +1,5 @@
 {
-  "name": "range-slider-card",
+  "name": "flex-slider-card",
   "version": "0.1.0",
   "description": "A slider **custom card** for Home Assistant.",
   "main": "index.js",
