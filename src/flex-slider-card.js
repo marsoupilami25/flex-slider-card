@@ -1,5 +1,6 @@
 import noUiSlider from "nouislider";
 import { stdFlexSliderCardCss } from "./std-flex-slider-css.js"
+import { compactFlexSliderCardCss } from "./compact-flex-slider-css.js"
 
 export class FlexSliderCard extends HTMLElement {
   
@@ -125,9 +126,25 @@ export class FlexSliderCard extends HTMLElement {
   }
   
   _renderTemplate(name) {
+    const {
+      format = "std"
+    } = this.config;
+    let css = '';
+
+    switch (format) {
+      case "std":
+        css = stdFlexSliderCardCss;
+        break;
+      case "compact":
+        css = compactFlexSliderCardCss;
+        break;
+      default:
+        throw new Error("Invalid format '"+format+"'");
+    }
+
     this.shadowRoot.innerHTML = `
       <style>
-        ${stdFlexSliderCardCss}
+        ${css}
       </style>
 
       <div class="container">
@@ -304,15 +321,42 @@ export class FlexSliderCard extends HTMLElement {
   }
 
   getCardSize() {
+    const {
+      format = "std"
+    } = this.config;
+
+    switch (format) {
+      case "std":
+        return 2;
+      case "compact":
+        return 1;
+      default:
+        throw new Error("Invalid format '"+format+"'");
+    }
     return 2;
   }
 
   getGridOptions() {
-    return {
-      min_rows: 2,
-      min_columns: 6,
-      max_columns: 12
-    };
+    const {
+      format = "std"
+    } = this.config;
+
+    switch (format) {
+      case "std":
+        return {
+          min_rows: 2,
+          min_columns: 6,
+          max_columns: 12
+        };
+      case "compact":
+        return {
+          min_rows: 1,
+          min_columns: 2,
+          max_columns: 6
+        };
+      default:
+        throw new Error("Invalid format '"+format+"'");
+    }
   }
 }
 
