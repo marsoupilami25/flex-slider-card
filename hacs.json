@@ -1,7 +1,7 @@
 {
-  "name": "range-slider-card",
+  "name": "flex-slider-card",
   "content_in_root": false,
-  "filename": "range-slider-card.js",
+  "filename": "flex-slider-card.js",
   "homeassistant": "2025.1.0",
   "render_readme": true
 }
