@@ -1,25 +1,27 @@
 {
-  "name": "range-slider-card",
+  "name": "flex-slider-card",
   "version": "0.1.0",
   "description": "A slider **custom card** for Home Assistant.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "vite build",
+    "deploy": "scp -r dist/* ha:/root/config/www/community/flex-slider-card/",
+    "all": "npm run build && npm run deploy",
     "dev": "vite"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marsoupilami25/range-slider-card.git"
+    "url": "git+https://github.com/marsoupilami25/flex-slider-card.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/marsoupilami25/range-slider-card/issues"
+    "url": "https://github.com/marsoupilami25/flex-slider-card/issues"
   },
-  "homepage": "https://github.com/marsoupilami25/range-slider-card#readme",
+  "homepage": "https://github.com/marsoupilami25/flex-slider-card#readme",
   "devDependencies": {
     "vite": "^7.3.1"
   },
