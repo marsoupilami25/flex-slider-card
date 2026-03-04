@@ -60,6 +60,8 @@ The compact format:
 | `max`        | number |Number only (*)|No       |100           | The maximum selectable value. Always 23:59 for `input_date`|
 | `step`       | number |All            |No       |1             | Increment step for the slider. Rounded for `input_date`|
 
+(*) Number means `input_number` and `number`
+
 ### Configuration example
 
 Example configuration for **Lovelace UI**:  
