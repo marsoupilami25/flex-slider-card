@@ -7,9 +7,13 @@ Accepted domains are `input_number`, `number` and `input_datetime`.
 For `input_datetime` the manageable range is a day (from 0 to 23h59).
 
 Two formats are available.
+
 The standard format:
+
 ![Image of a standard flex slider card](/assets/standard.png) 
+
 The compact format:
+
 ![Image of a standard flex slider card](/assets/compact.png) 
 
 ## Features  
@@ -26,12 +30,13 @@ The compact format:
 2.  Go to HACS -> Frontend -> Explore & Add Repositories.
 3.  Click on the top right triple dots and go to "Custom repositories".
 4.  Add https://github.com/marsoupilami25/flex-slider-card as custom repository
+
 ![](/assets/custom_repo.png)
 5.  Search for "Flex Slider Card".
 6.  Click "Install".
 7.  Restart Home Assistant (if prompted).
 
-### 2️⃣ Manual Installation  
+### Manual Installation  
 - Download `range-slider-card.js` in the `dist` folder
 - Place it in your `www` folder in Home Assistant  
 - Installation instructions: go to Settings > Dashboards > (top right, the three dots) > Resources > Add resource > paste the following URL: `/local/range-slider-card.js` or `/local/range-small-slider-card.js` or `range-time-slider-card.js`
