@@ -2266,6 +2266,101 @@ const stdFlexSliderCardCss = `
     display: none;
   }
 `;
+const compactFlexSliderCardCss = `
+  ${nouiCss}
+  
+  ha-card {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--ha-card-background, var(--card-background-color));
+    border-radius: var(--ha-card-border-radius, 12px);
+    box-shadow: var(--ha-card-box-shadow, 0px 2px 4px rgba(0, 0, 0, 0.16));
+    border-width: var(--ha-card-border-width, 1px);
+    border-style: solid;
+    border-color: var(--ha-card-border-color, var(--divider-color));
+    transition: all 0.3s ease-out;
+    box-sizing: border-box;
+  }
+  
+  .slider-container {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .slider {
+    width: 90%;
+    margin: 0px 10px;
+  }
+  
+  .values {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  
+  .title {
+    justify-content: flex-start;
+    font-size: 1rem;
+    margin-top: 2%;
+    margin-bottom: 1%;
+    color: var(--primary-text-color);
+  }
+  
+  .values {
+    color: var(--primary-text-color);
+    font-size: 0.8rem;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    width: 90%;
+  }
+  
+  .noUi-target {
+    height: 6px;
+    background: color-mix(in srgb, var(--disabled-color) 30%, transparent);
+    border-radius: 4px / 6px;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .noUi-base {
+    height: 6px;
+  }
+  
+  .noUi-connect {
+    height: 6px;
+    background: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+  
+  .noUi-horizontal .noUi-handle {
+    width: 12px;
+    height: 12px;
+    top: -3px;
+    right: -6px;
+    background: var(--primary-color);
+    border-width: 0px;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+  
+  .noUi-handle::before, .noUi-handle::after {
+    display: none;
+  }
+`;
 class FlexSliderCard extends HTMLElement {
   static State = Object.freeze({
     DISCONNECTED: 0,
@@ -2379,9 +2474,23 @@ class FlexSliderCard extends HTMLElement {
     }
   }
   _renderTemplate(name) {
+    const {
+      format = "std"
+    } = this.config;
+    let css = "";
+    switch (format) {
+      case "std":
+        css = stdFlexSliderCardCss;
+        break;
+      case "compact":
+        css = compactFlexSliderCardCss;
+        break;
+      default:
+        throw new Error("Invalid format '" + format + "'");
+    }
     this.shadowRoot.innerHTML = `
       <style>
-        ${stdFlexSliderCardCss}
+        ${css}
       </style>
 
       <div class="container">
@@ -2435,7 +2544,7 @@ class FlexSliderCard extends HTMLElement {
     const {
       entity_min,
       entity_max,
-      name = "range Slider"
+      name = "Range Slider"
     } = this.config;
     const stateMin = this._hass.states[entity_min];
     const stateMax = this._hass.states[entity_max];
@@ -2496,7 +2605,7 @@ class FlexSliderCard extends HTMLElement {
     } = this.config;
     if (this._entitytype == "time") {
       min = 0;
-      max = 1440;
+      max = 1439;
       step = Math.round(step);
     }
     noUiSlider.create(this._sliderElement, {
@@ -2548,14 +2657,38 @@ class FlexSliderCard extends HTMLElement {
     });
   }
   getCardSize() {
-    return 2;
+    const {
+      format = "std"
+    } = this.config;
+    switch (format) {
+      case "std":
+        return 2;
+      case "compact":
+        return 1;
+      default:
+        throw new Error("Invalid format '" + format + "'");
+    }
   }
   getGridOptions() {
-    return {
-      min_rows: 2,
-      min_columns: 6,
-      max_columns: 12
-    };
+    const {
+      format = "std"
+    } = this.config;
+    switch (format) {
+      case "std":
+        return {
+          min_rows: 2,
+          min_columns: 6,
+          max_columns: 12
+        };
+      case "compact":
+        return {
+          min_rows: 1,
+          min_columns: 2,
+          max_columns: 6
+        };
+      default:
+        throw new Error("Invalid format '" + format + "'");
+    }
   }
 }
 customElements.define("flex-slider-card", FlexSliderCard);

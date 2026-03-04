@@ -204,7 +204,7 @@ export class FlexSliderCard extends HTMLElement {
     const {
       entity_min,
       entity_max,
-      name = "range Slider"
+      name = "Range Slider"
     } = this.config;
     const stateMin = this._hass.states[entity_min];
     const stateMax = this._hass.states[entity_max];
@@ -267,7 +267,7 @@ export class FlexSliderCard extends HTMLElement {
     } = this.config;
     if (this._entitytype == "time") {
       min = 0;
-      max = 1440;
+      max = 1439;
       step = Math.round(step);
     }
     noUiSlider.create(this._sliderElement, {

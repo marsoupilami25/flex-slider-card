@@ -1,40 +1,66 @@
 
-# 📊 Home Assistant Range Slider Card  (beta)
+# UI Card for Flex Slider
 
-A **custom card** for Home Assistant that allows adjusting **two** `input_number` or **two** `input_datetime` values with a **single slider**, enabling the selection of a custom value range.  
+A custom card for Home Assistant that allows adjusting two `entities` values with a single slider, enabling the selection of a custom value range.  
 
-## 📷 Preview  
-![all](https://github.com/Gasp96/range-slider-card/blob/main/assets/Screen_Recording_20250206_183226_Home%20Assistant_1.gif) 
-Small version
-![all](https://github.com/Gasp96/range-slider-card/blob/main/assets/Screen_Recording_20250207_122654_Home%20Assistant_1.gif) 
+Accepted domains are `input_number`, `number` and `input_datetime`.
+For `input_datetime` the manageable range is a day (from 0 to 23h59).
 
-## 🚀 Features  
-✅ **Dual Value Control** – Adjust two `input_number` or two `input_datetime` values with a single slider.  
-✅ **Custom Ranges** – Define your own minimum and maximum value limits.  
+Two formats are available.
+The standard format:
+![Image of a standard flex slider card](/assets/standard.png) 
+The compact format:
+![Image of a standard flex slider card](/assets/compact.png) 
 
+## Features  
 
-## 📌 Installation  
+- [X] Adjust two `entities` with a single slider.  
+- [X] Define your own minimum and maximum value limits
+- [X] Select compact or standard display
 
-### 1️⃣ HACS
+## Installation  
+
+### HACS
 
 1.  Ensure you have [HACS (Home Assistant Community Store)](https://hacs.xyz/) installed.
 2.  Go to HACS -> Frontend -> Explore & Add Repositories.
-3.  Search for "Range Slider Card".
-4.  Click "Install".
-5.  Restart Home Assistant (if prompted).
+3.  Click on the top right triple dots and go to "Custom repositories".
+4.  Add https://github.com/marsoupilami25/flex-slider-card as custom repository
+![](/assets/custom_repo.png)
+5.  Search for "Flex Slider Card".
+6.  Click "Install".
+7.  Restart Home Assistant (if prompted).
 
 ### 2️⃣ Manual Installation  
-- Download `range-slider-card.js` or `range-small-slider-card.js` or `range-time-slider-card.js`
+- Download `range-slider-card.js` in the `dist` folder
 - Place it in your `www` folder in Home Assistant  
 - Installation instructions: go to Settings > Dashboards > (top right, the three dots) > Resources > Add resource > paste the following URL: `/local/range-slider-card.js` or `/local/range-small-slider-card.js` or `range-time-slider-card.js`
 - Restart Home Assistant
 
-## ⚙️ Configuration  
+## Options  
+
+### Display Options
+|Option       |Type    |Domain     |Mandatory|Default       | Description |
+|-------------|--------|-----------|---------|--------------|-|
+| `name`      | string |All        |No       |`Range Slider`| Display name for the slider.|
+| `format`    | string |All        |No       |`std`         | Format type. Is `std` or `compact`|
+| `unit`      | string |All        |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
+
+### Behavioral Options
+| Option       | Type   |Domain         |Mandatory|Default       | Description |
+|--------------|--------|-----------    |---------|--------------|-------------|
+| `entity_min` | string |All            |Yes      |/             | The `entity` for the minimum value |
+| `entity_max` | string |All            |Yes      |/             | The `entity` entity for the maximum value |
+| `min`        | number |Number only (*)|No       |0             | The minimum selectable value. Always 00:00 for `input_date`|
+| `max`        | number |Number only (*)|No       |100           | The maximum selectable value. Always 23:59 for `input_date`|
+| `step`       | number |All            |No       |1             | Increment step for the slider. Rounded for `input_date`|
+
+### Configuration example
 
 Example configuration for **Lovelace UI**:  
 
 ```yaml
-type: custom:range-slider-card
+type: custom:flex-slider-card
 entity_min: input_number.min_value
 entity_max: input_number.max_value
 min: 0
@@ -42,9 +68,9 @@ max: 100
 step: 1
 unit: '%'
 ```
-Small version
+Compact version
 ```yaml
-type: custom:range-small-slider-card
+type: custom:flex-slider-card
 entity_min: input_number.min_value
 entity_max: input_number.max_value
 min: 0
@@ -54,30 +80,19 @@ unit: '%'
 ```
 Time version
 ```yaml
-type: custom:range-time-slider-card
+type: custom:flex-slider-card
 entity_time_min: input_datetime.time1
 entity_time_max: input_datetime.time2
 ```
 
-### 🔧 Options  
-
-| Option       | Type   | Description |
-|-------------|--------|-------------|
-| `name` | string | Display name for the slider.I recommend using copy and paste with an invisible character if you want to remove the name |
-| `entity_min` | string | The `input_number` entity for the minimum value |
-| `entity_max` | string | The `input_number` entity for the maximum value |
-| `min`       | number | The minimum selectable value |
-| `max`       | number | The maximum selectable value |
-| `step`      | number | Increment step for the slider |
-| `unit`      | string | Display unit (e.g., `%`, `°C`, etc.) |
-
-### 🐞 Bugs
+### Bugs
 
 If the card is not displaying in Home Assistant, please try the following troubleshooting steps:
 Clear your browser cache or the Home Assistant app cache to ensure that the latest resources are loaded.
- 
 
-## 🛠️ Contributing  
+Otherwise got to the [issues](https://github.com/marsoupilami25/flex-slider-card/issues) page, check the issue exist or open a new one.
+
+## Contributing  
 Feel free to submit issues or pull requests to improve this component!  
 
 ⭐ **If you find this useful, don't forget to star this repository!**  

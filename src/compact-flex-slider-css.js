@@ -49,7 +49,7 @@ export const compactFlexSliderCardCss = `
   
   .title {
     justify-content: flex-start;
-    font-size: 1.2rem;
+    font-size: 1rem;
     margin-top: 2%;
     margin-bottom: 1%;
     color: var(--primary-text-color);
@@ -57,39 +57,37 @@ export const compactFlexSliderCardCss = `
   
   .values {
     color: var(--primary-text-color);
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-top: 1%;
     margin-bottom: 1%;
     width: 90%;
   }
   
   .noUi-target {
-    height: 16px;
+    height: 6px;
     background: color-mix(in srgb, var(--disabled-color) 30%, transparent);
-    border-radius: 10px / 16px;
+    border-radius: 4px / 6px;
     border: none;
     box-shadow: none;
   }
   
   .noUi-base {
-    height: 16px;
+    height: 6px;
   }
   
   .noUi-connect {
-    height: 16px;
+    height: 6px;
     background: color-mix(in srgb, var(--primary-color) 30%, transparent);
   }
   
   .noUi-horizontal .noUi-handle {
-    width: 18px;
-    height: 18px;
-    top: -1px;
-    right: -9px;
-    background: var(--primary-text-color);
-    border-width: 3px;
-    border-style: solid;
-    border-color: var(--primary-color);
-    border-radius: 15px;
+    width: 12px;
+    height: 12px;
+    top: -3px;
+    right: -6px;
+    background: var(--primary-color);
+    border-width: 0px;
+    border-radius: 10px;
     box-shadow: none;
   }
   
