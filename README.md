@@ -1,4 +1,6 @@
 
+[![GitHub release](https://img.shields.io/github/v/release/marsoupilami25/flex-slider-card?display_name=tag)](https://github.com/marsoupilami25/flex-slider-card/releases)
+
 # UI Card for Flex Slider
 
 A custom card for Home Assistant that allows adjusting two `entities` values with a single slider, enabling the selection of a custom value range.  
