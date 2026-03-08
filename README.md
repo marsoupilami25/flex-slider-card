@@ -10,11 +10,11 @@ For `input_datetime` the manageable range is a day (from 0 to 23h59).
 
 Two formats are available.
 
-The standard format:
+The standard format with title and bottom values bar:
 
 ![Image of a standard flex slider card](/assets/standard.png) 
 
-The compact format:
+The compact format with title and bottom values bar:
 
 ![Image of a standard flex slider card](/assets/compact.png) 
 
@@ -23,6 +23,8 @@ The compact format:
 - [X] Adjust two `entities` with a single slider.  
 - [X] Define your own minimum and maximum value limits
 - [X] Select compact or standard display
+- [X] Optional title
+- [X] Option bar with entity values
 
 ## Installation  
 
@@ -47,11 +49,19 @@ The compact format:
 ## Options  
 
 ### Display Options
-|Option       |Type    |Domain     |Mandatory|Default       | Description |
-|-------------|--------|-----------|---------|--------------|-|
-| `name`      | string |All        |No       |`Range Slider`| Title for the slider. If not configured or `''`, the title is not displayed. |
-| `format`    | string |All        |No       |`std`         | Format type. Is `std` or `compact`|
-| `unit`      | string |All        |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
+|Option       |Type           |Domain         |Mandatory|Default       | Description |
+|-------------|---------------|---------------|---------|--------------|-|
+| `name`      | string        |All            |No       |`Range Slider`| Title for the slider. If not configured or `''`, the title is not displayed. |
+| `format`    | string        |All            |No       |`std`         | Format type. Is `std` or `compact`|
+| `unit`      | string        |All            |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
+| `valuesbar` | boolean       |All            |No       |false         | Display a bottom bar with entity values |
+
+### Display Options for values bar
+|Option       |Type           |Domain         |Mandatory|Default       | Description |
+|-------------|---------------|---------------|---------|--------------|-|
+| `mintext`   | string        |All            |No       |Empty         | Text to display before the minimum value. |
+| `maxtext`   | string        |All            |No       |Empty         | Text to display before the maximum value. |
+| `digits`    | string/number |Number only (*)|No       |`auto`        | Number of digits displayed in the bottom value bar. Is a number or `auto`. When `auto` the number of digits is automatically calculated from the step. |
 
 ### Behavioral Options
 | Option       | Type   |Domain         |Mandatory|Default       | Description |
