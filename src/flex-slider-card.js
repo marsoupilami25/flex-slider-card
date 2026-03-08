@@ -303,13 +303,23 @@ export class FlexSliderCard extends HTMLElement {
     });
     this._slider.on("update", (values) => {
       this._debuglog("update");
+      let { 
+        mintext = '',
+        maxtext = ''
+      } = this.config;
+      if (mintext != '') {
+        mintext = mintext + ': ';
+      }
+      if (maxtext != '') {
+        maxtext = maxtext + ': ';
+      }
       const { unit = "" } = this.config;
       const minVal = this._sliderToDisplay(values[0]);
       const maxVal = this._sliderToDisplay(values[1]);
       const minElement = this.shadowRoot.getElementById("min-value");
       const maxElement = this.shadowRoot.getElementById("max-value");
-      minElement.textContent = `Min: ${minVal}${unit}`;
-      maxElement.textContent = `Max: ${maxVal}${unit}`;
+      minElement.textContent = `${mintext}${minVal}${unit}`;
+      maxElement.textContent = `${maxtext}${maxVal}${unit}`;
     });
     this._slider.on("end", () => {
       this._debuglog("end");
