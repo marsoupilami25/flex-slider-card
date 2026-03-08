@@ -49,7 +49,7 @@ The compact format:
 ### Display Options
 |Option       |Type    |Domain     |Mandatory|Default       | Description |
 |-------------|--------|-----------|---------|--------------|-|
-| `name`      | string |All        |No       |`Range Slider`| Display name for the slider.|
+| `name`      | string |All        |No       |`Range Slider`| Title for the slider. If not configured or `''`, the title is not displayed. |
 | `format`    | string |All        |No       |`std`         | Format type. Is `std` or `compact`|
 | `unit`      | string |All        |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
 
