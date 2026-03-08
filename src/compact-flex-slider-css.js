@@ -18,6 +18,7 @@ export const compactFlexSliderCardCss = `
   
   .container {
     height: 100%;
+    padding-bottom: 3px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -31,22 +32,24 @@ export const compactFlexSliderCardCss = `
   }
   
   .container.no-title {
-    padding-top: 2%;
-    padding-bottom: 1%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    justify-content: center;
   }
 
   .title {
     display: flex;
+    height: 20px;
     align-items: center;
     justify-content: center;
-    flex: 3;
     font-size: 0.9rem;
     color: var(--primary-text-color);
+    /* border: 1px solid blue; /* Debugging border */
   }
  
   .slider-with-values {
     width: 90%;
-    flex: 7;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -56,11 +59,10 @@ export const compactFlexSliderCardCss = `
 
   .slider-container {
     width: 100%;
-    height: 15px;
+    height: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: 1px;
     /* border: 1px solid green; /* Debugging border */
   }
   

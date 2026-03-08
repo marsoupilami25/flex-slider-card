@@ -125,10 +125,21 @@ export class FlexSliderCard extends HTMLElement {
     }
   }
   
+  _hasValuesBar() {
+    const { valuesbar = false } = this.config;
+    if (!(typeof valuesbar === "boolean")) {
+      throw new Error("valuesbar shall be boolean");
+    }
+    return valuesbar;
+  }
+
   _renderTemplate(name) {
     const {
       format = "std"
     } = this.config;
+    
+    const valuesbar = this._hasValuesBar();
+
     let css = '';
 
     switch (format) {
@@ -155,10 +166,12 @@ export class FlexSliderCard extends HTMLElement {
           <div class="slider-container">
             <div class="slider" id="slider"></div>
           </div>
-          <div class="values">
-            <span id="min-value"></span>
-            <span id="max-value"></span>
-          </div>
+          ${valuesbar ? `
+            <div class="values">
+              <span id="min-value"></span>
+              <span id="max-value"></span>
+            </div>
+          ` : ""}
         </div>
       </div>
     `;
@@ -303,23 +316,25 @@ export class FlexSliderCard extends HTMLElement {
     });
     this._slider.on("update", (values) => {
       this._debuglog("update");
-      let { 
-        mintext = '',
-        maxtext = ''
-      } = this.config;
-      if (mintext != '') {
-        mintext = mintext + ': ';
-      }
-      if (maxtext != '') {
-        maxtext = maxtext + ': ';
-      }
-      const { unit = "" } = this.config;
-      const minVal = this._sliderToDisplay(values[0]);
-      const maxVal = this._sliderToDisplay(values[1]);
-      const minElement = this.shadowRoot.getElementById("min-value");
-      const maxElement = this.shadowRoot.getElementById("max-value");
-      minElement.textContent = `${mintext}${minVal}${unit}`;
-      maxElement.textContent = `${maxtext}${maxVal}${unit}`;
+      if (this._hasValuesBar()) {
+        let { 
+          mintext = '',
+          maxtext = ''
+        } = this.config;
+        if (mintext != '') {
+          mintext = mintext + ': ';
+        }
+        if (maxtext != '') {
+          maxtext = maxtext + ': ';
+        }
+        const { unit = "" } = this.config;
+        const minVal = this._sliderToDisplay(values[0]);
+        const maxVal = this._sliderToDisplay(values[1]);
+        const minElement = this.shadowRoot.getElementById("min-value");
+        const maxElement = this.shadowRoot.getElementById("max-value");
+        minElement.textContent = `${mintext}${minVal}${unit}`;
+        maxElement.textContent = `${maxtext}${maxVal}${unit}`;
+     }
     });
     this._slider.on("end", () => {
       this._debuglog("end");
@@ -365,10 +380,11 @@ export class FlexSliderCard extends HTMLElement {
     } = this.config;
 
     const hasTitle = (name ?? "").trim().length > 0;
+    const hasValuesBar = this._hasValuesBar();
 
     switch (format) {
       case "std":
-        if (hasTitle) {
+        if (hasTitle && hasValuesBar) {
           return {
             rows: 2,
             min_rows: 2,
