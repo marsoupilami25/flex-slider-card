@@ -12,7 +12,7 @@ export const stdFlexSliderCardCss = `
     height: 100%;
   }
   
-ha-card {
+  ha-card {
     height: 100%;
   }
   
@@ -31,7 +31,7 @@ ha-card {
   }
   
   .container.no-title {
-    padding-top: 2%;
+    padding-top: 1%;
     padding-bottom: 1%;
   }
 
@@ -39,18 +39,19 @@ ha-card {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 4;
+    flex: 3;
     font-size: 1.2rem;
     color: var(--primary-text-color);
   }
 
   .slider-with-values {
     width: 90%;
-    flex: 6;
+    flex: 7;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* border: 1px solid red; /* Debugging border */
   }
   
   .slider-container {
@@ -60,6 +61,7 @@ ha-card {
     justify-content: center;
     align-items: center;
     padding-top: 3px;
+    /* border: 1px solid green; /* Debugging border */
   }
   
   .slider {
@@ -73,9 +75,13 @@ ha-card {
     color: var(--primary-text-color);
     font-size: 1rem;
     width: 100%;
-    padding-bottom: 3px;
+    padding-bottom: 2px;
   }
   
+  .container.no-title .values {
+    font-size: 0.9rem;
+  }
+
   .noUi-target {
     height: 16px;
     background: color-mix(in srgb, var(--disabled-color) 30%, transparent);

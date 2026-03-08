@@ -340,22 +340,34 @@ export class FlexSliderCard extends HTMLElement {
 
   getGridOptions() {
     const {
-      format = "std"
+      format = "std",
+      name = ''
     } = this.config;
+
+    const hasTitle = (name ?? "").trim().length > 0;
 
     switch (format) {
       case "std":
-        return {
-          rows: 2,
-          min_rows: 2,
-          min_columns: 6,
-          max_columns: 12
-        };
+        if (hasTitle) {
+          return {
+            rows: 2,
+            min_rows: 2,
+            min_columns: 6,
+            max_columns: 12
+          };
+        } else {
+          return {
+            rows: 1,
+            min_rows: 1,
+            min_columns: 6,
+            max_columns: 12
+          };
+        }
       case "compact":
         return {
           min_rows: 1,
           min_columns: 2,
-          max_columns: 6
+          max_columns: 9
         };
       default:
         throw new Error("Invalid format '"+format+"'");
