@@ -5,7 +5,7 @@ export class FlexSliderCardSlider {
 
   constructor(config, minvalue, maxvalue, htmlelement) {
     this._config = config;                           // reference to the card configuration
-    this._userIsUpdating = true;                       //true when user is currently dragging the slider, false otherwise
+    this._userIsUpdating = false;                       //true when user is currently dragging the slider, false otherwise
     noUiSlider.create(htmlelement, {
       start: [minvalue, maxvalue],
       connect: true,
@@ -43,6 +43,10 @@ export class FlexSliderCardSlider {
 
   update(min, max) {
     this._slider.set([min, max], false); // false to prevent firing the "update" event
+  }
+
+  destroy() {
+    this._slider.destroy();
   }
 
   /****************************************************/

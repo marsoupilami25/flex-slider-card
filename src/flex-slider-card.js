@@ -1,8 +1,7 @@
 import { stdFlexSliderCardCss } from "./std-flex-slider-css.js"
 import { compactFlexSliderCardCss } from "./compact-flex-slider-css.js"
 import { FlexSliderCardConfig } from "./flex-slider-card-config.js";
-import { minutesToTime, debuglog } from "./utils.js";
-import { FlexSliderCardEntity } from "./flex-slider-card-entity.js";
+import { debuglog } from "./utils.js";
 import { FlexSliderCardSlider } from "./flex-slider-card-slider.js";
 import { FlexSliderCardValuesBar } from "./flex-slider-card-valuesbar.js";
 
@@ -41,14 +40,14 @@ export class FlexSliderCard extends HTMLElement {
   
   set hass(hass) {
     debuglog("hass");
-    this._hass = hass;
-    if (this._state == FlexSliderCard._State.CONNECTED && this._config) {
+    if (this._config) {
       this._config.update(hass);
-      this._init();
+      if (this._state == FlexSliderCard._State.CONNECTED) {
+        this._toOperState();
+      }
     }
     if (this._state == FlexSliderCard._State.OPER) {
-      this._config.update(hass);
-      this._updateValuesDisplay();
+      this._Oper();
     }
   }
 
@@ -102,18 +101,14 @@ export class FlexSliderCard extends HTMLElement {
     debuglog("DISCONNECTED");
     this._userIsUpdating = false;                       //true when user is currently dragging the slider, false otherwise
     this._slider = null;                                // reference to the noUiSlider instance
-    this._updateValuesDisplayInProgress = false;        // true when _updateValuesDisplay is currently running, false otherwise
-    this._updateValuesDisplayRequestPending = false;    // true if a call to _updateValuesDisplay was requested while it was already running, false otherwise
-    this._sliderElement = null;                         // reference to the DOM element in which the slider is created
+    this._updateHtmlElementInProgress = false;        // true when _updateValuesDisplay is currently running, false otherwise
+    this._updateHtmlElementRequestPending = false;    // true if a call to _updateValuesDisplay was requested while it was already running, false otherwise
+    this._sliderHtmlElement = null;                         // reference to the DOM element in which the slider is created
   }
 
   /****************************************************/
   /* Utilities                                        */
   /****************************************************/
-
-  _debuglog(text) {
-    if (this._activeDebug) console.log(text);
-  }
 
   /****************************************************/
   /* State Management                                 */
@@ -122,8 +117,8 @@ export class FlexSliderCard extends HTMLElement {
   static _State = Object.freeze({
     DISCONNECTED: 0,
     CONNECTED: 1,
-    INIT: 2,
-    OPER: 3,
+    OPER: 2,
+    IDLE: 3,
     ERROR: 4
   });
   
@@ -150,23 +145,39 @@ export class FlexSliderCard extends HTMLElement {
     debuglog("ERROR");
     throw new Error(error.message);
   } 
-
-  /****************************************************/
-  /* State Management                                 */
-  /****************************************************/
-
-  _init() {
-    this._state = FlexSliderCard._State.INIT;
-    debuglog("INIT");
-    if (this._create()) {
-      this._updateValuesDisplay();
-    } else {
-      this._state = FlexSliderCard._State.ERROR;
-      debuglog("ERROR");
-    }
+  _toIdleState() {
+    this._state = FlexSliderCard._State.IDLE;
+    debuglog("IDLE");
   }
-  
-  _renderTemplate() {
+
+  _toOperState() {
+    debuglog("INIT");
+    try {
+      if (!this._createHtmlElement()) {
+        this._toIdleState();
+        return;
+      } 
+      this._initSlider();
+    } catch (error) {
+      this._toErrorState(error);
+    }
+    debuglog("OPER");
+    this._state = FlexSliderCard._State.OPER;
+  }
+
+  _Oper() {
+    this._updateHtmlElement();
+  }
+
+  /****************************************************/
+  /* HTML Management                                  */
+  /****************************************************/
+
+  _createHtmlElement() {
+    if (!this._config.entitiesExist()) {
+      this.shadowRoot.innerHTML = `<p>Entities not found</p>`;
+      return false;
+    }
     
     const hasvaluesbar = this._config.hasValuesBar();
     const hasTitle = this._config.hasTitle();
@@ -206,58 +217,49 @@ export class FlexSliderCard extends HTMLElement {
     if (hasvaluesbar) {
       const valuesBar = new FlexSliderCardValuesBar(this._config, this.shadowRoot.querySelector(".values"));
       this._config.valuesBar = valuesBar;
-    }
-
-  }
- 
-  _create() {
-    if (!this._config.entitiesExist()) {
-      this.shadowRoot.innerHTML = `<p>Entities not found</p>`;
-      return false;
-    }
-    this._renderTemplate();
-    this._sliderElement = this.shadowRoot.getElementById("slider");
+    }    
+    
+    this._sliderHtmlElement = this.shadowRoot.getElementById("slider");
     return true;
   }
   
-  _updateValuesDisplay() {
-    if (this._updateValuesDisplayInProgress) {
-      this._updateValuesDisplayRequestPending = true;
+  _updateHtmlElement() {
+    if (this._updateHtmlElementInProgress) {
+      this._updateHtmlElementRequestPending = true;
       return;
     }
-    this._updateValuesDisplayInProgress = true;
+    this._updateHtmlElementInProgress = true;
     try {
-      if (this._slider && this._slider.isUserUpdating()) {
+      if (this._slider.isUserUpdating()) {
         return;
       }
-      const minValue = this._config.entities.min.value;
-      const maxValue = this._config.entities.max.value;
-      if (!this._slider) {
-        this._initSlider(minValue, maxValue);
+      if (this._config.entitiesIsUpdated()) {
+        const min = this._config.entities.min.value;
+        const max = this._config.entities.max.value;
+        this._slider.update(min, max);
         this._config.entitiesSetBaseline();
       } else {
-        if (this._config.entitiesIsUpdated()) {
-          this._slider.update(minValue, maxValue);
-          this._config.entitiesSetBaseline();
-        }
       }
     } finally {
-      this._updateValuesDisplayInProgress = false;
-      if (this._updateValuesDisplayRequestPending) {
-        this._updateValuesDisplayRequestPending = false;
-        queueMicrotask(() => this._updateValuesDisplay());
+      this._updateHtmlElementInProgress = false;
+      if (this._updateHtmlElementRequestPending) {
+        this._updateHtmlElementRequestPending = false;
+        queueMicrotask(() => this._updateHtmlElement());
       }
-    }
-    if (this._state != FlexSliderCard._State.OPER) {
-      this._state = FlexSliderCard._State.OPER;
-      debuglog("OPER");
     }
     return;
   }
   
-  _initSlider(min, max) {
+  /****************************************************/
+  /* Slider Management                                */
+  /****************************************************/
+
+  _initSlider() {
     if (this._slider) return;
-    this._slider = new FlexSliderCardSlider(this._config, min, max, this._sliderElement);
+    const min = this._config.entities.min.value;
+    const max = this._config.entities.max.value;
+    this._slider = new FlexSliderCardSlider(this._config, min, max, this._sliderHtmlElement);
+    this._config.entitiesSetBaseline();
   }
   
 }

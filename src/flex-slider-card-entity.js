@@ -1,4 +1,3 @@
-import { FlexSliderCardConfig } from "./flex-slider-card-config";
 import { timeToMinutes, minutesToTime } from "./utils";
 
 export class FlexSliderCardEntity {
