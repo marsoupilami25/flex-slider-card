@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc --noEmit --watch",
+    "typecheck": "tsc --noEmit",
     "build": "vite build",
     "deploy": "scp -r dist/* ha:/root/config/www/community/flex-slider-card/",
-    "all": "npm run build && npm run deploy",
+    "all": "npm run typecheck && npm run build && npm run deploy",
     "dev": "vite"
   },
   "repository": {
@@ -23,9 +25,12 @@
   },
   "homepage": "https://github.com/marsoupilami25/flex-slider-card#readme",
   "devDependencies": {
+    "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "custom-card-helpers": "^2.0.0",
+    "lit": "^3.3.2",
     "nouislider": "^15.8.1"
   },
   "engines": {

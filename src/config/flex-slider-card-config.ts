@@ -1,11 +1,23 @@
-import { FlexSliderCardEntity } from "./flex-slider-card-entity";
+import { HomeAssistant } from "custom-card-helpers";
+import { FlexSliderCardEntity, FlexSliderCardEntityType } from "../flex-slider-card-entity";
+import { FlexSliderCardFormat, 
+  FlexSliderCardDigits, 
+  FlexSliderCardConfig, 
+  assertFlexSliderCardFormat, 
+  assertFlexSliderCardDigits} from "./flex-slider-card-config-type";
+import { FlexSliderCardValuesBar } from "../flex-slider-card-valuesbar";
 
-export class FlexSliderCardConfig  {
+export class FlexSliderCardConfigMngr  {
   
-  constructor(config) {
+  private _config: FlexSliderCardConfig;
+  private _entities: { [suffix: string]: FlexSliderCardEntity };
+  private _entitytype?: FlexSliderCardEntityType;
+  private _valuesBar!: FlexSliderCardValuesBar | undefined;
+
+  constructor(config: FlexSliderCardConfig) {
     this._config = structuredClone(config);      // user configuration object
     this._entities = {};        // entities objects, with suffix as key ("min" and "max")
-    this._entitytype = null;    // entity type: "number" or "time", depending on the domains of entity_min and entity_max
+    this._entitytype = undefined;    // entity type: "number" or "time", depending on the domains of entity_min and entity_max
 
     this._checkFormat();
     this._checkTitle();
@@ -14,7 +26,7 @@ export class FlexSliderCardConfig  {
     this._checkValuesBar();
   }
 
-  update(hass) {
+  public update(hass: HomeAssistant): void {
     this._updateFormat(hass);
     this._updateTitle(hass);
     this._updateEntities(hass); 
@@ -22,7 +34,7 @@ export class FlexSliderCardConfig  {
     this._updateValuesBar(hass);
   }
 
-  reset() {
+  public reset(): void {
     this._resetFormat();
     this._resetTitle();
     this._resetEntities(); 
@@ -34,28 +46,26 @@ export class FlexSliderCardConfig  {
   /* format                                           */
   /****************************************************/
 
-  _checkFormat() {
+  protected _checkFormat(): void {
     if (this._config.format === undefined) {
       this._config.format = "std";
     }
-    else if (this._config.format != "std" && this._config.format != "compact") {
-      throw new Error("Invalid format '"+this._config.format+"'");
-    }
+    assertFlexSliderCardFormat(this._config.format);
   }
 
-  _updateFormat(hass) {
+  protected _updateFormat(hass: HomeAssistant): void {
     return;
   }
 
-  _resetFormat() {
+  protected _resetFormat(): void {
     return;
   }
 
-  isCompact() {
+  public isCompact(): boolean {
     return this._config.format === "compact";
   }
 
-  isStd() {
+  public isStd(): boolean {
     return this._config.format === "std";
   }
 
@@ -63,7 +73,7 @@ export class FlexSliderCardConfig  {
   /* title                                            */
   /****************************************************/
 
-  _checkTitle() {
+  protected _checkTitle(): void {
     if (this._config.name != undefined && typeof this._config.name !== "string") {
       throw new Error("Invalid name '"+this._config.name+"'");
     }
@@ -73,19 +83,19 @@ export class FlexSliderCardConfig  {
     }
   }
 
-  _updateTitle(hass) {
+  protected _updateTitle(hass: HomeAssistant): void {
     return;
   }
 
-  _resetTitle() {
+  protected _resetTitle(): void {
     return;
   }
 
-  hasTitle() {
+  public hasTitle(): boolean {
     return this._config.name !== undefined;
   }
 
-  get title() {
+  public get title(): string {
     return this._config.name || "";
   }
 
@@ -93,7 +103,7 @@ export class FlexSliderCardConfig  {
   /* values bar                                       */
   /****************************************************/
 
-  _checkValuesBar() {
+  protected _checkValuesBar(): void {
     if (this._config.valuesbar != undefined && typeof this._config.valuesbar !== "boolean") {
       throw new Error("Invalid valuesbar '"+this._config.valuesbar+"'");
     }
@@ -101,16 +111,12 @@ export class FlexSliderCardConfig  {
       this._config.valuesbar = false;
     }
 
-    if (this._config.digits != undefined && 
-      (typeof this._config.digits !== "number" || this._config.digits < 0) && 
-      this._config.digits !== "auto") {
-      throw new Error("Invalid digits '"+this._config.digits+"'");
-    }
     if (this._config.digits == undefined) {
       this._config.digits = "auto";
     }
+    assertFlexSliderCardDigits(this._config.digits);
     if (this._config.digits === "auto") {
-      this._config.digits = this.step.toString().split(".")[1]?.length || 0;
+      this._config.digits = this.step!.toString().split(".")[1]?.length || 0; //_checkSlider should have been called before and set a default value for step if it was not defined by the user
     }
 
     if (this._config.unit == undefined) {
@@ -137,50 +143,50 @@ export class FlexSliderCardConfig  {
       this._config.maxtext = this._config.maxtext + ": ";
     }
 
-    this._valuesBar = null; // reference to the values bar object, if it is created
+    this._valuesBar = undefined; // reference to the values bar object, if it is created
   }
 
-  _updateValuesBar(hass) {
+  protected _updateValuesBar(hass: HomeAssistant): void {
     return;
   }
 
-  _resetValuesBar() {
+  protected _resetValuesBar(): void {
     return;
   }
 
-  hasValuesBar() {
+  public hasValuesBar(): boolean {
     return this._config.valuesbar === true;
   }
 
-  set valuesBar(valuesBar) {
+  public set valuesBar(valuesBar) {
     this._valuesBar = valuesBar;
   }
 
-  get valuesBar() {
+  public get valuesBar(): FlexSliderCardValuesBar | undefined {
     return this._valuesBar;
   }
   
-  get digits() {
-    return this._config.digits;
+  public get digits(): FlexSliderCardDigits {
+    return this._config.digits!;
   }
 
-  get unit() {
-    return this._config.unit;
+  public get unit(): string {
+    return this._config.unit!;
   }
 
-  get mintext() {
-    return this._config.mintext;
+  public get mintext(): string {
+    return this._config.mintext!;
   }
 
-  get maxtext() {
-    return this._config.maxtext;
+  public get maxtext(): string {
+    return this._config.maxtext!;
   } 
 
   /****************************************************/
   /* slider                                           */
   /****************************************************/
 
-  _checkSlider() {
+  protected _checkSlider(): void {
     if (this._config.min != undefined && typeof this._config.min !== "number") {
       throw new Error("Invalid min '"+this._config.min+"'");
     }
@@ -202,7 +208,7 @@ export class FlexSliderCardConfig  {
       this._config.step = 1;
     }
 
-    if (this.entitytype === FlexSliderCardEntity.TYPE.TIME) {
+    if (this.entitytype === FlexSliderCardEntityType.TIME) {
       this._config.min = 0;
       this._config.max = 1439;
       this._config.step = Math.round(this._config.step);
@@ -210,31 +216,31 @@ export class FlexSliderCardConfig  {
 
   }
 
-  _updateSlider(hass) {
+  protected _updateSlider(hass: HomeAssistant): void {
     return;
   }
 
-  _resetSlider() {
+  protected _resetSlider(): void {
     return;
   }
 
-  get min() {
-    return this._config.min;
+  public get min(): number {
+    return this._config.min!;
   }
 
-  get max() {
-    return this._config.max;
+  public get max(): number {
+    return this._config.max!;
   }
 
-  get step() {
-    return this._config.step; 
+  public get step(): number {
+    return this._config.step!;
   }
 
   /****************************************************/
   /* entities                                         */
   /****************************************************/
 
-  _isValidEntityId(entity) {
+  protected _isValidEntityId(entity: string): boolean {
     if (typeof entity !== "string") {
       return false;
     }
@@ -244,7 +250,7 @@ export class FlexSliderCardConfig  {
     return entityRegex.test(entity);
   }
 
-  _checkEntities() {
+  protected _checkEntities(): void {
     
     if (!this._config.entity_min || !this._config.entity_max) {
       throw new Error("You need to define 'entity_min' and 'entity_max'");
@@ -268,42 +274,42 @@ export class FlexSliderCardConfig  {
 
   }
 
-  _updateEntities(hass) {
+  protected _updateEntities(hass: HomeAssistant): void {
     Object.values(this._entities).forEach(entity => entity.update(hass));
   }
 
-  _resetEntities() {
+  protected _resetEntities(): void {
     if (this.entitiesExist()) {
       this.entitiesResetBaseline();
     }
   }
 
-  _getEntityConfig(suffix) {
+  public getEntityConfig(suffix: string): string {
     return this._config[`entity_${suffix}`];
   }
 
-  get entitytype() {
-    return this._entitytype;
+  public get entitytype(): FlexSliderCardEntityType {
+    return this._entitytype!;
   }
 
-  get entities() {
+  public get entities(): { [suffix: string]: FlexSliderCardEntity } {
     return this._entities;
   }
 
-  entitiesExist() {
+  public entitiesExist(): boolean {
     return Object.values(this._entities).every(entity => entity.exists());
   }
 
-  entitiesResetBaseline() {
+  public entitiesResetBaseline(): void {
     Object.values(this._entities).forEach(entity => entity.resetBaseline());
   }
   
-  entitiesSetBaseline() {
+  public entitiesSetBaseline(): void {
     Object.values(this._entities).forEach(entity => entity.setBaseline());
   }
 
-  entitiesIsUpdated() {
-    return Object.values(this._entities).some(entity => entity.isupdated());
+  public entitiesIsUpdated(): boolean {
+    return Object.values(this._entities).some(entity => entity.isUpdated());
   }
 
 }

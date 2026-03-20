@@ -1,9 +1,9 @@
-import { stdFlexSliderCardCss } from "./std-flex-slider-css.js"
-import { compactFlexSliderCardCss } from "./compact-flex-slider-css.js"
-import { FlexSliderCardConfig } from "./flex-slider-card-config.js";
-import { debuglog } from "./utils.js";
-import { FlexSliderCardSlider } from "./flex-slider-card-slider.js";
-import { FlexSliderCardValuesBar } from "./flex-slider-card-valuesbar.js";
+import { stdFlexSliderCardCss } from "./css/std-flex-slider-css"
+import { compactFlexSliderCardCss } from "./css/compact-flex-slider-css"
+import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
+import { debuglog } from "./utils/utils";
+import { FlexSliderCardSlider } from "./flex-slider-card-slider";
+import { FlexSliderCardValuesBar } from "./flex-slider-card-valuesbar";
 
 export class FlexSliderCard extends HTMLElement {
   
@@ -22,7 +22,7 @@ export class FlexSliderCard extends HTMLElement {
   setConfig(config) {
     debuglog("setConfig");
     try {
-      this._config = new FlexSliderCardConfig(config);
+      this._config = new FlexSliderCardConfigMngr(config);
     } catch (error) {
       this._toErrorState(error);
     }
@@ -234,8 +234,8 @@ export class FlexSliderCard extends HTMLElement {
         return;
       }
       if (this._config.entitiesIsUpdated()) {
-        const min = this._config.entities.min.value;
-        const max = this._config.entities.max.value;
+        const min = this._config.entities.min.sliderValue;
+        const max = this._config.entities.max.sliderValue;
         this._slider.update(min, max);
         this._config.entitiesSetBaseline();
       } else {
@@ -256,8 +256,8 @@ export class FlexSliderCard extends HTMLElement {
 
   _initSlider() {
     if (this._slider) return;
-    const min = this._config.entities.min.value;
-    const max = this._config.entities.max.value;
+    const min = this._config.entities.min.sliderValue;
+    const max = this._config.entities.max.sliderValue;
     this._slider = new FlexSliderCardSlider(this._config, min, max, this._sliderHtmlElement);
     this._config.entitiesSetBaseline();
   }
