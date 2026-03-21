@@ -1,12 +1,45 @@
 import { stdFlexSliderCardCss } from "./css/std-flex-slider-css"
 import { compactFlexSliderCardCss } from "./css/compact-flex-slider-css"
-import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
+import { FlexSliderCardConfigMngr,  } from "./config/flex-slider-card-config";
+import { FlexSliderCardConfig } from "./config/flex-slider-card-config-type";
 import { debuglog } from "./utils/utils";
 import { FlexSliderCardSlider } from "./flex-slider-card-slider";
 import { FlexSliderCardValuesBar } from "./flex-slider-card-valuesbar";
+import { HomeAssistant, LovelaceCard } from "custom-card-helpers";
+import { NoUiSliderElement } from "./flex-slider-card-slider";
 
-export class FlexSliderCard extends HTMLElement {
-  
+enum FlexSliderCardState {
+  DISCONNECTED = 0,
+  CONNECTED = 1,
+  OPER = 2,
+  IDLE = 3,
+  ERROR = 4
+}
+
+type GridOptions =
+  {
+    rows?: number;
+    min_rows?: number;
+    max_rows?: number;
+    columns?: number;
+    min_columns?: number;
+    max_columns?: number;
+  };
+
+export class FlexSliderCard extends HTMLElement implements LovelaceCard  {
+
+  /****************************************************/
+  /* private parameters                               */
+  /****************************************************/
+
+  private _state: FlexSliderCardState = FlexSliderCardState.DISCONNECTED;   // current state of the card
+  private _config: FlexSliderCardConfigMngr | undefined;        // reference to the card configuration
+  private _sliderHtmlElement: NoUiSliderElement | null | undefined;          // reference to the DOM element in which the slider is created
+  private _slider: FlexSliderCardSlider | undefined;            // reference to the noUiSlider instance
+  private _userIsUpdating: boolean = false;
+  private _updateHtmlElementInProgress: boolean = false;        // true when _updateValuesDisplay is currently running, false otherwise
+  private _updateHtmlElementRequestPending: boolean = false;    // true if a call to _updateValuesDisplay was requested while it was already running, false otherwise
+
   /****************************************************/
   /* Public methods                                   */
   /****************************************************/
@@ -19,7 +52,7 @@ export class FlexSliderCard extends HTMLElement {
     debuglog("constructor");
   }
   
-  setConfig(config) {
+  public setConfig(config: FlexSliderCardConfig): void {
     debuglog("setConfig");
     try {
       this._config = new FlexSliderCardConfigMngr(config);
@@ -28,40 +61,46 @@ export class FlexSliderCard extends HTMLElement {
     }
   }
   
-  connectedCallback() {
+  public connectedCallback(): void {
     debuglog("connectedCallback");
     this._toConnectedState();
   }
   
-  disconnectedCallback() {
+  public disconnectedCallback(): void {
     debuglog("disconnectedCallback");
     this._toDisconnectedState();
   }
   
-  set hass(hass) {
+  public set hass(hass: HomeAssistant) {
     debuglog("hass");
     if (this._config) {
       this._config.update(hass);
-      if (this._state == FlexSliderCard._State.CONNECTED) {
+      if (this._state == FlexSliderCardState.CONNECTED) {
         this._toOperState();
       }
     }
-    if (this._state == FlexSliderCard._State.OPER) {
+    if (this._state == FlexSliderCardState.OPER) {
       this._Oper();
     }
   }
 
-  getCardSize() {
+  public getCardSize(): number | Promise<number> {
+    if (!this._config) {
+      throw new Error("Config not initialized");
+    }
     if (this._config.isStd()) {
       return 2;
     } else if (this._config.isCompact()) {
       return 1;
     } else {
-          throw new Error("Invalid format in getCardSize");
+      throw new Error("Invalid format in getCardSize");
     }
   }
 
-  getGridOptions() {
+  public getGridOptions(): GridOptions {
+    if (!this._config) {
+      throw new Error("Config not initialized");
+    }
     if (this._config.isStd()) {
       if (this._config.hasTitle() && this._config.hasValuesBar()) {
         return {
@@ -93,17 +132,16 @@ export class FlexSliderCard extends HTMLElement {
   /* Private parameters                               */
   /****************************************************/
 
-  _initPrivateConfig() {        // parameters initialized by constructor
-    this._config = null;         // user configuration object
+  private _initPrivateConfig(): void {        // parameters initialized by constructor
+    this._config = undefined;         // user configuration object
   }
   
-  _initPrivateDisplayData() {                           //parameters initialized by the constructor or when the card is disconnected
-    debuglog("DISCONNECTED");
+  private _initPrivateDisplayData(): void {                           //parameters initialized by the constructor or when the card is disconnected
     this._userIsUpdating = false;                       //true when user is currently dragging the slider, false otherwise
-    this._slider = null;                                // reference to the noUiSlider instance
+    this._slider = undefined;                                // reference to the noUiSlider instance
     this._updateHtmlElementInProgress = false;        // true when _updateValuesDisplay is currently running, false otherwise
     this._updateHtmlElementRequestPending = false;    // true if a call to _updateValuesDisplay was requested while it was already running, false otherwise
-    this._sliderHtmlElement = null;                         // reference to the DOM element in which the slider is created
+    this._sliderHtmlElement = undefined;                         // reference to the DOM element in which the slider is created
   }
 
   /****************************************************/
@@ -114,25 +152,17 @@ export class FlexSliderCard extends HTMLElement {
   /* State Management                                 */
   /****************************************************/
 
-  static _State = Object.freeze({
-    DISCONNECTED: 0,
-    CONNECTED: 1,
-    OPER: 2,
-    IDLE: 3,
-    ERROR: 4
-  });
-  
-  _toDisconnectedState() {
+  private _toDisconnectedState(): void {
     if (this._slider) {
       this._slider.destroy();
     }
     this._initPrivateDisplayData();
-    this._state = FlexSliderCard._State.DISCONNECTED;   // current state of the card is DISCONNECTED
+    this._state = FlexSliderCardState.DISCONNECTED;   // current state of the card is DISCONNECTED
   }
 
-  _toConnectedState() {
-    if (this._state == FlexSliderCard._State.DISCONNECTED) {
-      this._state = FlexSliderCard._State.CONNECTED;
+  private _toConnectedState(): void {
+    if (this._state == FlexSliderCardState.DISCONNECTED) {
+      this._state = FlexSliderCardState.CONNECTED;
       debuglog("CONNECTED");
     } else {
       debuglog("Unexpected state when connecting: "+this._state);
@@ -140,17 +170,21 @@ export class FlexSliderCard extends HTMLElement {
     }
   }
 
-  _toErrorState(error) {
-    this._state = FlexSliderCard._State.ERROR;
+  private _toErrorState(error: unknown): never {
+    this._state = FlexSliderCardState.ERROR;
     debuglog("ERROR");
-    throw new Error(error.message);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Unknown error "+String(error));
+    }
   } 
-  _toIdleState() {
-    this._state = FlexSliderCard._State.IDLE;
+  private _toIdleState(): void {
+    this._state = FlexSliderCardState.IDLE;
     debuglog("IDLE");
   }
 
-  _toOperState() {
+  private _toOperState(): void {
     debuglog("INIT");
     try {
       if (!this._createHtmlElement()) {
@@ -162,10 +196,10 @@ export class FlexSliderCard extends HTMLElement {
       this._toErrorState(error);
     }
     debuglog("OPER");
-    this._state = FlexSliderCard._State.OPER;
+    this._state = FlexSliderCardState.OPER;
   }
 
-  _Oper() {
+  private _Oper(): void {
     this._updateHtmlElement();
   }
 
@@ -173,7 +207,13 @@ export class FlexSliderCard extends HTMLElement {
   /* HTML Management                                  */
   /****************************************************/
 
-  _createHtmlElement() {
+  private _createHtmlElement(): boolean {
+    if (!this._config) {
+      throw new Error("Config not initialized");
+    }
+    if (!this.shadowRoot) {
+      throw new Error("Shadow root not initialized");
+    }
     if (!this._config.entitiesExist()) {
       this.shadowRoot.innerHTML = `<p>Entities not found</p>`;
       return false;
@@ -215,20 +255,33 @@ export class FlexSliderCard extends HTMLElement {
     `;
 
     if (hasvaluesbar) {
-      const valuesBar = new FlexSliderCardValuesBar(this._config, this.shadowRoot.querySelector(".values"));
+      const valueElement: HTMLElement | null = this.shadowRoot.querySelector(".values");
+      if (!valueElement) {
+        throw new Error("Values bar element not found in DOM");
+      }
+      const valuesBar = new FlexSliderCardValuesBar(this._config, valueElement);
       this._config.valuesBar = valuesBar;
     }    
     
-    this._sliderHtmlElement = this.shadowRoot.getElementById("slider");
+    const element = this.shadowRoot.getElementById("slider");
+    if (!element) {
+      throw new Error("Slider element not found in DOM");
+    }
+    this._sliderHtmlElement = element as NoUiSliderElement;
     return true;
   }
   
-  _updateHtmlElement() {
+  private _updateHtmlElement(): void {
+    if (!this._config || !this._slider) {
+      return;
+    }
+    
     if (this._updateHtmlElementInProgress) {
       this._updateHtmlElementRequestPending = true;
       return;
     }
     this._updateHtmlElementInProgress = true;
+    
     try {
       if (this._slider.isUserUpdating()) {
         return;
@@ -254,11 +307,25 @@ export class FlexSliderCard extends HTMLElement {
   /* Slider Management                                */
   /****************************************************/
 
-  _initSlider() {
+  public _initSlider(): void {
+    if (!this._config) {
+      throw new Error("Config not initialized");
+    }
+    
     if (this._slider) return;
+
+    if (!this._sliderHtmlElement) {
+      throw new Error("Slider HTML element not initialized");
+    }
+
     const min = this._config.entities.min.sliderValue;
     const max = this._config.entities.max.sliderValue;
-    this._slider = new FlexSliderCardSlider(this._config, min, max, this._sliderHtmlElement);
+    this._slider = new FlexSliderCardSlider(
+      this._config,
+      min,
+      max,
+      this._sliderHtmlElement
+    );
     this._config.entitiesSetBaseline();
   }
   

@@ -3,7 +3,7 @@ import { debuglog } from "./utils/utils";
 import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
 
 // Extension de HTMLElement pour typer noUiSlider
-interface NoUiSliderElement extends HTMLElement {
+export interface NoUiSliderElement extends HTMLElement {
   noUiSlider: NoUiSliderAPI;
 }
 

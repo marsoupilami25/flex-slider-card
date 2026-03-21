@@ -81,7 +81,7 @@ export class FlexSliderCardEntity {
     return this._datatype
   }
 
-  public get sliderValue(): number | undefined {
+  public get sliderValue(): number {
     if (!this._states) {
       throw new Error("Hass states not initialized");
     }
