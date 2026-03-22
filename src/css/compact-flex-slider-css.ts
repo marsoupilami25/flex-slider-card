@@ -3,17 +3,11 @@ import nouiCss from "nouislider/dist/nouislider.css?inline";
 export const compactFlexSliderCardCss: string = `
   ${nouiCss}
   
-  * {
-  box-sizing: border-box;
-  }
-  
-  :host {
+  :host([compact]) {
     display: block;
     height: 100%;
-  }
-  
-  ha-card {
-    height: 100%;
+    --flex-slider-card-barvalues-font-size: 0.8rem;
+    --flex-slider-card-barvalues-padding-bottom: 1px;
   }
   
   .container.compact {
@@ -52,7 +46,7 @@ export const compactFlexSliderCardCss: string = `
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     /* border: 1px solid red; /* Debugging border */
   }
@@ -68,16 +62,6 @@ export const compactFlexSliderCardCss: string = `
   
   .container.compact .slider {
     width: 100%;
-  }
-  
-  .container.compact .values {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    color: var(--primary-text-color);
-    font-size: 0.8rem;
-    width: 100%;
-    padding-bottom: 1px;
   }
   
   /* noUiSlider overrides */

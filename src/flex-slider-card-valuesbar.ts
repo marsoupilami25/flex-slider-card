@@ -1,18 +1,74 @@
-import { minutesToTime } from "./utils/utils";
+import { debuglog, minutesToTime } from "./utils/utils";
 import { FlexSliderCardEntity, FlexSliderCardEntityType } from "./flex-slider-card-entity";
 import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
+import { css, html, LitElement, nothing } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
-export class FlexSliderCardValuesBar {
+@customElement("flex-slider-card-valuesbar")
+export class FlexSliderCardValuesBar extends LitElement {
 
-  private _config: FlexSliderCardConfigMngr;
-  private _valueBarElement: HTMLElement;
+  /****************************************************/
+  /* private parameters                               */
+  /****************************************************/
 
-  constructor(config: FlexSliderCardConfigMngr, htmlelement: HTMLElement) {
-    this._config = config;                           // reference to the card configuration
-    this._valueBarElement = htmlelement;             // reference to the DOM element of the values bar
+  @property({ attribute: false }) 
+  public config!: FlexSliderCardConfigMngr;
+  
+  static override styles = css`
+    * {
+      box-sizing: border-box;
+    }
+    .valuesbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      color: var(--primary-text-color);
+      font-size: var(--flex-slider-card-barvalues-font-size);
+      padding-bottom: var(--flex-slider-card-barvalues-padding-bottom);
+      align-self: stretch;
+      /* border: 1px solid blue; /* Debugging border */
+    }
+  `;
+
+  /****************************************************/
+  /* Public methods - Lit Element                     */
+  /****************************************************/
+
+  protected override render() {
+    debuglog("rendering values bar");
+    
+    if (!this.config) {
+      return html`<div class="valuesbar">No config found</div>`;
+    }
+
+    if (!this.config.entitiesExist()) {
+      return html`<div class="valuesbar">Entities not found</div>`;
+    }
+
+    const min = this._minValue;
+    const max = this._maxValue;
+    
+    if (this.config.hasValuesBar()) {
+      // Values bar is enabled
+      return html`
+        <div class="valuesbar">
+          <span id="min-value">${min}</span>
+          <span id="max-value">${max}</span>
+        </div>
+      `;
+    } else {
+      // Values bar is disabled, render nothing
+      return nothing;
+    }
+    
   }
 
-  update(values: number[]): void {
+  /****************************************************/
+  /* Public methods - Values Bar                      */
+  /****************************************************/
+
+  /* public updateValues(values: number[]): void {
     const mintext = this._config.mintext;
     const maxtext = this._config.maxtext;
     const unit = this._config.unit;
@@ -27,13 +83,33 @@ export class FlexSliderCardValuesBar {
     
     minElement.textContent = `${mintext}${minVal}${unit}`;
     maxElement.textContent = `${maxtext}${maxVal}${unit}`;
+  } */
+
+  /****************************************************/
+  /* Private methods - Values Bar                     */
+  /****************************************************/
+
+  private get _minValue(): string {
+    const mintext = this.config.mintext;
+    const unit = this.config.unit;
+    const min = this.config.entities.min.sliderValue;
+    const minDisplay = this._sliderToDisplay(min);
+    return `${mintext}${minDisplay}${unit}`;
   }
 
-  _sliderToDisplay(value: number): string {
-    if (this._config.entitytype == FlexSliderCardEntityType.NUMBER) {
-      return Number(value).toFixed(Number(this._config.digits));
+  private get _maxValue(): string {
+    const maxtext = this.config.maxtext;
+    const unit = this.config.unit;
+    const max = this.config.entities.max.sliderValue;
+    const maxDisplay = this._sliderToDisplay(max);
+    return `${maxtext}${maxDisplay}${unit}`;
+  }
+
+  private _sliderToDisplay(value: number): string {
+    if (this.config.entitytype == FlexSliderCardEntityType.NUMBER) {
+      return Number(value).toFixed(Number(this.config.digits));
     }
-    if (this._config.entitytype == FlexSliderCardEntityType.TIME) {
+    if (this.config.entitytype == FlexSliderCardEntityType.TIME) {
       return minutesToTime(value);
     }
     throw new Error("Unsupported entity type");

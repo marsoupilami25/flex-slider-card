@@ -3,17 +3,11 @@ import nouiCss from "nouislider/dist/nouislider.css?inline";
 export const stdFlexSliderCardCss: string = `
   ${nouiCss}
   
-  * {
-  box-sizing: border-box;
-  }
-  
-  :host {
+  :host([std]) {
     display: block;
     height: 100%;
-  }
-  
-  ha-card {
-    height: 100%;
+    --flex-slider-card-barvalues-font-size: 1rem;
+    --flex-slider-card-barvalues-padding-bottom: 2px;
   }
   
   .container.std {
@@ -52,7 +46,7 @@ export const stdFlexSliderCardCss: string = `
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     /* border: 1px solid red; /* Debugging border */
   }
@@ -70,16 +64,6 @@ export const stdFlexSliderCardCss: string = `
     width: 100%;
   }
 
-  .container.std .values {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    color: var(--primary-text-color);
-    font-size: 1rem;
-    width: 100%;
-    padding-bottom: 2px;
-  }
-  
   .container.std.no-title .values {
     font-size: 0.9rem;
   }

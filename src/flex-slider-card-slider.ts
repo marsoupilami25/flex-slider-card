@@ -84,7 +84,7 @@ export class FlexSliderCardSlider {
     debuglog("slider update");
     if (this._config.hasValuesBar()) {
       const numbers: number[] = values.map(Number);
-      this._config.valuesBar!.update(numbers);
+      // this._config.valuesBar!.updateValues(numbers);
     }
   }
 

@@ -6,8 +6,8 @@ import { FlexSliderCardConfigMngr,  } from "./config/flex-slider-card-config";
 import { FlexSliderCardConfig } from "./config/flex-slider-card-config-type";
 import { debuglog } from "./utils/utils";
 import { FlexSliderCardSlider, NoUiSliderElement } from "./flex-slider-card-slider";
-import { FlexSliderCardValuesBar } from "./flex-slider-card-valuesbar";
 import { HomeAssistant, LovelaceCard } from "custom-card-helpers";
+import "./flex-slider-card-valuesbar";
 
 type GridOptions =
   {
@@ -32,14 +32,20 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   private _error?: string;
   @query("#slider")
   private _sliderHtmlElement?: NoUiSliderElement;          // reference to the DOM element in which the slider is created
-  @query("#values")
-  private _valuesHtmlElement?: HTMLDivElement;             // reference to the DOM element in which the values are displayed
+  @query("flex-slider-card-valuesbar")
+  private _valuesBarElement?: LitElement;                // reference to the values bar element
 
   private _slider?: FlexSliderCardSlider;            // reference to the noUiSlider instance
   private _firstUpdate: boolean = true;           // flag to indicate if it is the first update of the card
   private _config?: FlexSliderCardConfigMngr;        // reference to the card configuration
 
   static override styles = css`
+    * {
+      box-sizing: border-box;
+    }
+    ha-card {
+      height: 100%;
+    }
     ${unsafeCSS(stdFlexSliderCardCss)}
     ${unsafeCSS(compactFlexSliderCardCss)}
   `;
@@ -58,6 +64,15 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     try {
       this._config = new FlexSliderCardConfigMngr(config);
       this._error = undefined;
+      if (this._config.isStd()) {
+        this.toggleAttribute("std", true);
+        this.toggleAttribute("compact", false);
+      } else if (this._config.isCompact()) {
+        this.toggleAttribute("std", false);
+        this.toggleAttribute("compact", true);
+      } else {
+        throw new Error("Invalid format in setConfig");
+      }
     } catch (error) {
       this._setError(error);
     }
@@ -141,7 +156,6 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     if (!this._config) {
       throw new Error("Config not initialized");
     }
-    this._initValuesBar();
     this._initSlider();
   }
 
@@ -150,8 +164,8 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
       return;
     }
     if (changedProps.has("hass") && this._config?.entitiesIsUpdated() ) {
+      this._valuesBarElement?.requestUpdate();
       this._updateSlider();
-      this._updateValuesBar();
     }
   }
 
@@ -185,12 +199,11 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
 
           ${hasValuesBar
             ? html`
-                <div class="values" id="values">
-                  <span id="min-value"></span>
-                  <span id="max-value"></span>
-                </div>
-              `
-            : nothing}
+              <flex-slider-card-valuesbar
+                .config=${this._config}
+              ></flex-slider-card-valuesbar>
+            `
+          : nothing}
         </div>
       </div>
     `;
@@ -246,35 +259,6 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
       const max = this._config.entities.max.sliderValue;
       this._slider.update(min, max);
       this._config.entitiesSetBaseline();
-    }
-  }
-
-  /****************************************************/
-  /* ValuesBar Management                             */
-  /****************************************************/
-
-  public _initValuesBar(): void {
-    if (!this._config) {
-      throw new Error("Config not initialized");
-    }
-    if (!this._config.hasValuesBar()) {
-      return;
-    }
-    if (!this._valuesHtmlElement) {
-      throw new Error("Values HTML element not initialized");
-    }
-    if (this._config.valuesBar) {
-      return;
-    }
-    this._config.valuesBar = new FlexSliderCardValuesBar(this._config, this._valuesHtmlElement);
-  }
-
-  public _updateValuesBar(): void {
-    if (!this._config) {
-      throw new Error("Config not initialized");
-    }
-    if (!this._config.hasValuesBar()) {
-      return;
     }
   }
 
