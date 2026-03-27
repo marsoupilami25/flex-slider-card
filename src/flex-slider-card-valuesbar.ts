@@ -13,7 +13,13 @@ export class FlexSliderCardValuesBar extends LitElement {
 
   @property({ attribute: false }) 
   public config!: FlexSliderCardConfigMngr;
-  
+ 
+  @property({ type: Number })
+  public minvalue = 0;
+
+  @property({ type: Number })
+  public maxvalue = 100;
+
   static override styles = css`
     * {
       box-sizing: border-box;
@@ -26,7 +32,6 @@ export class FlexSliderCardValuesBar extends LitElement {
       color: var(--primary-text-color);
       font-size: var(--flex-slider-card-barvalues-font-size);
       padding-bottom: var(--flex-slider-card-barvalues-padding-bottom);
-      align-self: stretch;
       /* border: 1px solid blue; /* Debugging border */
     }
   `;
@@ -92,16 +97,14 @@ export class FlexSliderCardValuesBar extends LitElement {
   private get _minValue(): string {
     const mintext = this.config.mintext;
     const unit = this.config.unit;
-    const min = this.config.entities.min.sliderValue;
-    const minDisplay = this._sliderToDisplay(min);
+    const minDisplay = this._sliderToDisplay(this.minvalue);
     return `${mintext}${minDisplay}${unit}`;
   }
 
   private get _maxValue(): string {
     const maxtext = this.config.maxtext;
     const unit = this.config.unit;
-    const max = this.config.entities.max.sliderValue;
-    const maxDisplay = this._sliderToDisplay(max);
+    const maxDisplay = this._sliderToDisplay(this.maxvalue);
     return `${maxtext}${maxDisplay}${unit}`;
   }
 

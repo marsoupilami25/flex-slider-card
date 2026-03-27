@@ -8,6 +8,7 @@ import { debuglog } from "./utils/utils";
 import { FlexSliderCardSlider, NoUiSliderElement } from "./flex-slider-card-slider";
 import { HomeAssistant, LovelaceCard } from "custom-card-helpers";
 import "./flex-slider-card-valuesbar";
+import "./flex-slider-card-slider";
 
 type GridOptions =
   {
@@ -35,7 +36,6 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   @query("flex-slider-card-valuesbar")
   private _valuesBarElement?: LitElement;                // reference to the values bar element
 
-  private _slider?: FlexSliderCardSlider;            // reference to the noUiSlider instance
   private _firstUpdate: boolean = true;           // flag to indicate if it is the first update of the card
   private _config?: FlexSliderCardConfigMngr;        // reference to the card configuration
 
@@ -85,10 +85,8 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   
   public disconnectedCallback(): void {
     super.disconnectedCallback();
-    if (this._slider) {
-      // this._slider.destroy();
-    }
     this._initPrivateDisplayData();
+    this._config?.reset();
     debuglog("disconnectedCallback");
   }
 
@@ -156,16 +154,17 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     if (!this._config) {
       throw new Error("Config not initialized");
     }
-    this._initSlider();
   }
 
   protected override updated(changedProps: Map<string, unknown>): void {
-    if (!this._config || !this._slider) {
+    if (!this._config) {
       return;
     }
-    if (changedProps.has("hass") && this._config?.entitiesIsUpdated() ) {
-      this._valuesBarElement?.requestUpdate();
-      this._updateSlider();
+    if (changedProps.has("hass")) {
+      if (this._config?.entitiesIsUpdated()) {
+        this.requestUpdate();
+        this._config.entitiesSetBaseline();
+      }
     }
   }
 
@@ -187,6 +186,9 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     const name = this._config.title;
     const isStd = this._config.isStd();
     const containerClass = `${isStd ? "std" : "compact"} ${hasTitle ? "" : "no-title"}`;
+    const sliderClass = `${isStd ? "std" : "compact"} ${hasTitle ? "" : "no-title"}`;
+    const minValue = this._config.entities.min.sliderValue;
+    const maxValue = this._config.entities.max.sliderValue;
 
     return html`
       <div class="container ${containerClass}">
@@ -194,13 +196,20 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
 
         <div class="slider-with-values">
           <div class="slider-container">
-            <div class="slider" id="slider"></div>
+            <flex-slider-card-slider
+              .config=${this._config}
+              .minvalue=${minValue}
+              .maxvalue=${maxValue} 
+              .sliderClass=${sliderClass}             
+            ></flex-slider-card-slider>
           </div>
 
           ${hasValuesBar
             ? html`
               <flex-slider-card-valuesbar
                 .config=${this._config}
+                .minvalue=${minValue}
+                .maxvalue=${maxValue}              
               ></flex-slider-card-valuesbar>
             `
           : nothing}
@@ -214,52 +223,7 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   /****************************************************/
 
   private _initPrivateDisplayData(): void {                           //parameters initialized by the constructor or when the card is disconnected
-    // this._slider = undefined;                                // reference to the noUiSlider instance
     this._firstUpdate = true;                                 // flag to indicate if it is the first update of the card
-  }
-
-  /****************************************************/
-  /* Slider Management                                */
-  /****************************************************/
-
-  public _initSlider(): void {
-    if (!this._config) {
-      throw new Error("Config not initialized");
-    }
-    
-    if (this._slider) return;
-
-    if (!this._sliderHtmlElement) {
-      throw new Error("Slider HTML element not initialized");
-    }
-
-    const min = this._config.entities.min.sliderValue;
-    const max = this._config.entities.max.sliderValue;
-    this._slider = new FlexSliderCardSlider(
-      this._config,
-      min,
-      max,
-      this._sliderHtmlElement
-    );
-    this._config.entitiesSetBaseline();
-  }
-
-    public _updateSlider(): void {
-    if (!this._config) {
-      throw new Error("Config not initialized");
-    }
-    if (!this._slider) {
-      throw new Error("Slider not initialized");
-    }
-    if (this._slider.isUserUpdating()) {
-      return;
-    }
-    if (this._config.entitiesIsUpdated()) {
-      const min = this._config.entities.min.sliderValue;
-      const max = this._config.entities.max.sliderValue;
-      this._slider.update(min, max);
-      this._config.entitiesSetBaseline();
-    }
   }
 
   /****************************************************/

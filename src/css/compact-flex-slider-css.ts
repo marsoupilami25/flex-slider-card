@@ -1,8 +1,5 @@
-import nouiCss from "nouislider/dist/nouislider.css?inline";
-
 export const compactFlexSliderCardCss: string = `
-  ${nouiCss}
-  
+ 
   :host([compact]) {
     display: block;
     height: 100%;
@@ -64,37 +61,4 @@ export const compactFlexSliderCardCss: string = `
     width: 100%;
   }
   
-  /* noUiSlider overrides */
-
-  .container.compact .noUi-target {
-    height: 6px;
-    background: color-mix(in srgb, var(--disabled-color) 30%, transparent);
-    border-radius: 4px / 6px;
-    border: none;
-    box-shadow: none;
-  }
-  
-  .container.compact .noUi-base {
-    height: 6px;
-  }
-  
-  .container.compact .noUi-connect {
-    height: 6px;
-    background: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  }
-  
-  .container.compact .noUi-horizontal .noUi-handle {
-    width: 12px;
-    height: 12px;
-    top: -3px;
-    right: -6px;
-    background: var(--primary-color);
-    border-width: 0px;
-    border-radius: 10px;
-    box-shadow: none;
-  }
-  
-  .container.compact .noUi-handle::before, .container.compact .noUi-handle::after {
-    display: none;
-  }
 `;

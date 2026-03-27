@@ -1,7 +1,4 @@
-import nouiCss from "nouislider/dist/nouislider.css?inline";
-
 export const stdFlexSliderCardCss: string = `
-  ${nouiCss}
   
   :host([std]) {
     display: block;
@@ -68,39 +65,4 @@ export const stdFlexSliderCardCss: string = `
     font-size: 0.9rem;
   }
 
-  /* noUiSlider overrides */
-
-  .container.std .noUi-target {
-    height: 16px;
-    background: color-mix(in srgb, var(--disabled-color) 30%, transparent);
-    border-radius: 10px / 16px;
-    border: none;
-    box-shadow: none;
-  }
-  
-  .container.std .noUi-base {
-    height: 16px;
-  }
-  
-  .container.std .noUi-connect {
-    height: 16px;
-    background: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  }
-  
-  .container.std .noUi-horizontal .noUi-handle {
-    width: 18px;
-    height: 18px;
-    top: -1px;
-    right: -9px;
-    background: var(--primary-text-color);
-    border-width: 3px;
-    border-style: solid;
-    border-color: var(--primary-color);
-    border-radius: 15px;
-    box-shadow: none;
-  }
-  
-  .container.std .noUi-handle::before, .container.std .noUi-handle::after {
-    display: none;
-  }
 `;
