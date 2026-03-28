@@ -1,6 +1,5 @@
 import { timeToMinutes, minutesToTime } from "./utils/utils";
 import { HomeAssistant } from "custom-card-helpers";
-import { FlexSliderCardConfig } from "./config/flex-slider-card-config-type";
 import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
 
 export enum FlexSliderCardEntityType {
@@ -25,7 +24,7 @@ export class FlexSliderCardEntity {
   private _entitytype: FlexSliderCardEntityType;
   private _service: FlexSliderCardService;
   private _entityid: string;
-  private _lastValue: number | undefined = undefined;
+  private _baselineValue: number | undefined = undefined;
   private _callService: HomeAssistant["callService"] | null = null;
   private _states: HomeAssistant["states"] | null = null;
   private _datatype: FlexSliderCardDataType;
@@ -85,14 +84,14 @@ export class FlexSliderCardEntity {
     if (!this._states) {
       throw new Error("Hass states not initialized");
     }
-    let state = this._states[this.entityId];
+    const state = this._states[this.entityId];
     if (!state) {
       throw new Error(`Entity '${this.entityId}' not found`);
     }
     return this._fromEntity(state.state);
   }
 
-  exists() {
+  public exists(): boolean {
     return !!this._states?.[this.entityId];
   }
 
@@ -100,12 +99,12 @@ export class FlexSliderCardEntity {
   /* Setters                                          */
   /****************************************************/
 
-  public set sliderValue(newSliderValue: number) {
+  public async setSliderValue(newSliderValue: number): Promise<void> {
     const havalue: FlexSliderCardValueType = this._toEntity(newSliderValue);
     if (!this._callService) {
       throw new Error("Hass callService not initialized");
     }
-    this._callService(this.domain, this.service, {
+    await this._callService(this.domain, this.service, {
       entity_id: this.entityId,
       [this.datatype]: havalue
     });
@@ -116,19 +115,19 @@ export class FlexSliderCardEntity {
   /****************************************************/
 
   public resetBaseline(): void {
-    this._lastValue = undefined;
+    this._baselineValue = undefined;
   }
 
-  public getBaseline(): FlexSliderCardValueType | undefined {
-    return this._lastValue;
+  public getBaseline(): number | undefined {
+    return this._baselineValue;
   }
 
   public setBaseline(): void {
-    this._lastValue = this.sliderValue;
+    this._baselineValue = this.sliderValue;
   }
 
   public isUpdated(): boolean {
-    return this.sliderValue !== this._lastValue;
+    return this.sliderValue !== this._baselineValue;
   }
 
   /****************************************************/
@@ -136,20 +135,20 @@ export class FlexSliderCardEntity {
   /****************************************************/
   
   private _toEntity(sliderValue: number): FlexSliderCardValueType {
-    if (this._entitytype == FlexSliderCardEntityType.NUMBER) {
+    if (this._entitytype === FlexSliderCardEntityType.NUMBER) {
       return Number(sliderValue);
     }
-    if (this._entitytype == FlexSliderCardEntityType.TIME) {
+    if (this._entitytype === FlexSliderCardEntityType.TIME) {
       return minutesToTime(sliderValue);
     }
     throw new Error(`Unexpected entity type '${this._entitytype}'`);
   }
 
   private _fromEntity(entityValue: FlexSliderCardValueType): number {
-    if (this._entitytype == FlexSliderCardEntityType.NUMBER) {
+    if (this._entitytype === FlexSliderCardEntityType.NUMBER) {
       return Number(entityValue);
     }
-    if (this._entitytype == FlexSliderCardEntityType.TIME) {
+    if (this._entitytype === FlexSliderCardEntityType.TIME) {
       return timeToMinutes(String(entityValue));
     }
     throw new Error(`Unexpected entity type '${this._entitytype}'`);

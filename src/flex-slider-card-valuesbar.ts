@@ -1,5 +1,5 @@
 import { debuglog, minutesToTime } from "./utils/utils";
-import { FlexSliderCardEntity, FlexSliderCardEntityType } from "./flex-slider-card-entity";
+import { FlexSliderCardEntityType } from "./flex-slider-card-entity";
 import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
@@ -12,7 +12,7 @@ export class FlexSliderCardValuesBar extends LitElement {
   /****************************************************/
 
   @property({ attribute: false }) 
-  public config!: FlexSliderCardConfigMngr;
+  public config?: FlexSliderCardConfigMngr;
  
   @property({ type: Number })
   public minvalue = 0;
@@ -43,29 +43,23 @@ export class FlexSliderCardValuesBar extends LitElement {
   protected override render() {
     debuglog("rendering values bar");
     
-    if (!this.config) {
-      return html`<div class="valuesbar">No config found</div>`;
+    if (!this.config || !this.config.entitiesExist()) {
+      return nothing;
     }
 
-    if (!this.config.entitiesExist()) {
-      return html`<div class="valuesbar">Entities not found</div>`;
+    if (!this.config.hasValuesBar()) {
+      return nothing;
     }
 
     const min = this._minValue;
     const max = this._maxValue;
     
-    if (this.config.hasValuesBar()) {
-      // Values bar is enabled
-      return html`
-        <div class="valuesbar">
-          <span id="min-value">${min}</span>
-          <span id="max-value">${max}</span>
-        </div>
-      `;
-    } else {
-      // Values bar is disabled, render nothing
-      return nothing;
-    }
+    return html`
+      <div class="valuesbar">
+        <span id="min-value">${min}</span>
+        <span id="max-value">${max}</span>
+      </div>
+    `;
     
   }
 
@@ -95,24 +89,24 @@ export class FlexSliderCardValuesBar extends LitElement {
   /****************************************************/
 
   private get _minValue(): string {
-    const mintext = this.config.mintext;
-    const unit = this.config.unit;
+    const mintext = this.config?.mintext || "";
+    const unit = this.config?.unit || "";
     const minDisplay = this._sliderToDisplay(this.minvalue);
     return `${mintext}${minDisplay}${unit}`;
   }
 
   private get _maxValue(): string {
-    const maxtext = this.config.maxtext;
-    const unit = this.config.unit;
+    const maxtext = this.config?.maxtext || "";
+    const unit = this.config?.unit || "";
     const maxDisplay = this._sliderToDisplay(this.maxvalue);
     return `${maxtext}${maxDisplay}${unit}`;
   }
 
   private _sliderToDisplay(value: number): string {
-    if (this.config.entitytype == FlexSliderCardEntityType.NUMBER) {
+    if (this.config?.entitytype === FlexSliderCardEntityType.NUMBER) {
       return Number(value).toFixed(Number(this.config.digits));
     }
-    if (this.config.entitytype == FlexSliderCardEntityType.TIME) {
+    if (this.config?.entitytype === FlexSliderCardEntityType.TIME) {
       return minutesToTime(value);
     }
     throw new Error("Unsupported entity type");

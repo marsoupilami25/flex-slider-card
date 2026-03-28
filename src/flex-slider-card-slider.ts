@@ -6,6 +6,7 @@ import { customElement, property, query } from "lit/decorators.js";
 import nouiCss from "nouislider/dist/nouislider.css?inline";
 import { stdFlexSliderSliderCardCss } from "./css/std-flex-slider-slider-css";
 import { compactFlexSliderSliderCardCss } from "./css/compact-flex-slider-slider-css";
+import { FlexSliderCardFormat } from "./config/flex-slider-card-config-type";
 
 
 // Extension de HTMLElement pour typer noUiSlider
@@ -24,7 +25,7 @@ export class FlexSliderCardSlider extends LitElement {
   public config!: FlexSliderCardConfigMngr;          // reference to the card configuration
 
   @property({ attribute: false }) 
-  public sliderClass: string = "";          // reference to the card configuration
+  public sliderClass: FlexSliderCardFormat = "std";          // reference to the card configuration
 
   @property({ type: Number })
   public minvalue = 0;
@@ -34,6 +35,7 @@ export class FlexSliderCardSlider extends LitElement {
 
   private _slider!: NoUiSliderAPI;                   // reference to the noUiSlider instance
   private _userIsUpdating: boolean = false;                 // true when user is currently dragging the slider, false otherwise
+  private _isSyncing: boolean = false;                         // true when the slider is being updated programmatically, false otherwise
 
   static override styles = css`
     ${unsafeCSS(nouiCss)}
@@ -86,7 +88,7 @@ export class FlexSliderCardSlider extends LitElement {
     });
     
     this._slider.on("change", (values: (number | string)[]) => {
-      this._onChange(values);
+      void this._onChange(values);
     });
     
     this._slider.on("update", (values: (number | string)[]) => {
@@ -99,7 +101,7 @@ export class FlexSliderCardSlider extends LitElement {
   }
 
   protected override updated(changedProps: Map<string, unknown>): void {
-    if (!this._slider || this._userIsUpdating) return;
+    if (!this._slider || this._userIsUpdating || this._isSyncing) return;
 
     if (changedProps.has("minvalue") || changedProps.has("maxvalue")) {
       this._slider.set([this.minvalue, this.maxvalue], false);
@@ -117,14 +119,6 @@ export class FlexSliderCardSlider extends LitElement {
     return this._userIsUpdating;
   }
 
-  /* public update(min: number, max: number) {
-    this._slider.set([min, max], false); // false to prevent firing the "update" event
-  } */
-
-  public destroy(): void {
-    this._slider.destroy();
-  }
-
   /****************************************************/
   /* CallBacks                                        */
   /****************************************************/
@@ -134,16 +128,24 @@ export class FlexSliderCardSlider extends LitElement {
     this._userIsUpdating = true;
   }
 
-  private _onChange(values: (number | string)[]): void {
+  private async _onChange(values: (number | string)[]): Promise<void> {
     debuglog("slider change");
-    this._userIsUpdating = false;
     
     // noUiSlider renvoie souvent des strings → conversion recommandée
     const min = Number(values[0]);
     const max = Number(values[1]);
 
-    this.config.entities.min.sliderValue = min;
-    this.config.entities.max.sliderValue = max;
+    this._isSyncing = true;
+    try {
+      await Promise.all([
+        this.config.entities.min.setSliderValue(min),
+        this.config.entities.max.setSliderValue(max)
+      ]);
+    } catch (error) {
+      console.error("Error occurred while updating slider values:", error);
+    } finally {
+      this._isSyncing = false;
+    }
   }
 
   private _onUpdate(values: (number | string)[]): void {

@@ -1,11 +1,10 @@
 import { html, css, LitElement, unsafeCSS, nothing } from "lit";
-import { customElement, property, state, query } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { stdFlexSliderCardCss } from "./css/std-flex-slider-css"
 import { compactFlexSliderCardCss } from "./css/compact-flex-slider-css"
-import { FlexSliderCardConfigMngr,  } from "./config/flex-slider-card-config";
+import { FlexSliderCardConfigMngr } from "./config/flex-slider-card-config";
 import { FlexSliderCardConfig } from "./config/flex-slider-card-config-type";
 import { debuglog } from "./utils/utils";
-import { FlexSliderCardSlider, NoUiSliderElement } from "./flex-slider-card-slider";
 import { HomeAssistant, LovelaceCard } from "custom-card-helpers";
 import "./flex-slider-card-valuesbar";
 import "./flex-slider-card-slider";
@@ -31,10 +30,6 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   public hass!: HomeAssistant;
   @state()
   private _error?: string;
-  @query("#slider")
-  private _sliderHtmlElement?: NoUiSliderElement;          // reference to the DOM element in which the slider is created
-  @query("flex-slider-card-valuesbar")
-  private _valuesBarElement?: LitElement;                // reference to the values bar element
 
   private _firstUpdate: boolean = true;           // flag to indicate if it is the first update of the card
   private _config?: FlexSliderCardConfigMngr;        // reference to the card configuration
@@ -92,7 +87,7 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
 
   public getCardSize(): number | Promise<number> {
     if (!this._config) {
-      throw new Error("Config not initialized");
+      return 1;
     }
     if (this._config.isStd()) {
       return 2;
@@ -105,7 +100,7 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
 
   public getGridOptions(): GridOptions {
     if (!this._config) {
-      throw new Error("Config not initialized");
+      return {};
     }
     if (this._config.isStd()) {
       if (this._config.hasTitle() && this._config.hasValuesBar()) {
@@ -142,17 +137,10 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     if (!this._config || !this.hass) {
       return;
     }
-    if (this._firstUpdate) {
+
+    if (this._firstUpdate || changedProps.has("hass")) {
       this._firstUpdate = false;
       this._config.update(this.hass);
-    } else if (changedProps.has("hass")) {
-      this._config.update(this.hass);
-    }
-  }
-
-  protected override firstUpdated(): void {
-    if (!this._config) {
-      throw new Error("Config not initialized");
     }
   }
 
@@ -161,10 +149,7 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
       return;
     }
     if (changedProps.has("hass")) {
-      if (this._config?.entitiesIsUpdated()) {
-        this.requestUpdate();
-        this._config.entitiesSetBaseline();
-      }
+      this._config.entitiesSetBaseline();
     }
   }
 
@@ -186,7 +171,7 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
     const name = this._config.title;
     const isStd = this._config.isStd();
     const containerClass = `${isStd ? "std" : "compact"} ${hasTitle ? "" : "no-title"}`;
-    const sliderClass = `${isStd ? "std" : "compact"} ${hasTitle ? "" : "no-title"}`;
+    const sliderClass = `${isStd ? "std" : "compact"}`;
     const minValue = this._config.entities.min.sliderValue;
     const maxValue = this._config.entities.max.sliderValue;
 
@@ -230,16 +215,15 @@ export class FlexSliderCard extends LitElement implements LovelaceCard  {
   /* Error Management                                 */
   /****************************************************/
 
-  private _setError(error: unknown): never {
+  private _setError(error: unknown): void {
     debuglog("ERROR");
 
     if (error instanceof Error) {
       this._error = error.message;
-      throw error;
+      return;
     }
 
     this._error = "Unknown error " + String(error);
-    throw new Error(this._error);
   }
 
 }

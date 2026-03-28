@@ -6,6 +6,9 @@ import { FlexSliderCardFormat,
   assertFlexSliderCardFormat, 
   assertFlexSliderCardDigits} from "./flex-slider-card-config-type";
 import { FlexSliderCardValuesBar } from "../flex-slider-card-valuesbar";
+import { assertOptionalString,
+  assertOptionalNumber,
+assertOptionalBoolean } from "../utils/utils";
 
 export class FlexSliderCardConfigMngr  {
   
@@ -53,13 +56,9 @@ export class FlexSliderCardConfigMngr  {
     assertFlexSliderCardFormat(this._config.format);
   }
 
-  protected _updateFormat(hass: HomeAssistant): void {
-    return;
-  }
+  protected _updateFormat(hass: HomeAssistant): void {}
 
-  protected _resetFormat(): void {
-    return;
-  }
+  protected _resetFormat(): void {}
 
   public isCompact(): boolean {
     return this._config.format === "compact";
@@ -74,22 +73,15 @@ export class FlexSliderCardConfigMngr  {
   /****************************************************/
 
   protected _checkTitle(): void {
-    if (this._config.name != undefined && typeof this._config.name !== "string") {
-      throw new Error("Invalid name '"+this._config.name+"'");
-    }
-
+    assertOptionalString(this._config.name, "name");
     if (this._config.name == undefined) {
       this._config.name = undefined;
     }
   }
 
-  protected _updateTitle(hass: HomeAssistant): void {
-    return;
-  }
+  protected _updateTitle(hass: HomeAssistant): void {}
 
-  protected _resetTitle(): void {
-    return;
-  }
+  protected _resetTitle(): void {}
 
   public hasTitle(): boolean {
     return this._config.name !== undefined;
@@ -104,9 +96,7 @@ export class FlexSliderCardConfigMngr  {
   /****************************************************/
 
   protected _checkValuesBar(): void {
-    if (this._config.valuesbar != undefined && typeof this._config.valuesbar !== "boolean") {
-      throw new Error("Invalid valuesbar '"+this._config.valuesbar+"'");
-    }
+    assertOptionalBoolean(this._config.valuesbar, "valuesbar");
     if (this._config.valuesbar == undefined) {
       this._config.valuesbar = false;
     }
@@ -116,16 +106,14 @@ export class FlexSliderCardConfigMngr  {
     }
     assertFlexSliderCardDigits(this._config.digits);
     if (this._config.digits === "auto") {
-      this._config.digits = this.step!.toString().split(".")[1]?.length || 0; //_checkSlider should have been called before and set a default value for step if it was not defined by the user
+      this._config.digits = this.step.toString().split(".")[1]?.length || 0; //_checkSlider should have been called before and set a default value for step if it was not defined by the user
     }
 
     if (this._config.unit == undefined) {
       this._config.unit = "";
     }
 
-    if (this._config.mintext != undefined && typeof this._config.mintext !== "string") {
-      throw new Error("Invalid mintext '"+this._config.mintext+"'");
-    }
+    assertOptionalString(this._config.mintext, "mintext");
     if (this._config.mintext == undefined) {
       this._config.mintext = "";
     }
@@ -133,8 +121,9 @@ export class FlexSliderCardConfigMngr  {
       this._config.mintext = this._config.mintext + ": ";
     }
 
-    if (this._config.maxtext != undefined && typeof this._config.maxtext !== "string") {
-      throw new Error("Invalid maxtext '"+this._config.maxtext+"'");
+    assertOptionalString(this._config.maxtext, "maxtext");
+    if (this._config.maxtext == undefined) {
+      this._config.maxtext = "";
     }
     if (this._config.maxtext == undefined) {
       this._config.maxtext = "";
@@ -146,19 +135,15 @@ export class FlexSliderCardConfigMngr  {
     this._valuesBar = undefined; // reference to the values bar object, if it is created
   }
 
-  protected _updateValuesBar(hass: HomeAssistant): void {
-    return;
-  }
+  protected _updateValuesBar(hass: HomeAssistant): void {}
 
-  protected _resetValuesBar(): void {
-    return;
-  }
+  protected _resetValuesBar(): void {}
 
   public hasValuesBar(): boolean {
     return (this._config.valuesbar === true);
   }
 
-  public set valuesBar(valuesBar) {
+  public set valuesBar(valuesBar: FlexSliderCardValuesBar | undefined) {
     this._valuesBar = valuesBar;
   }
 
@@ -167,62 +152,65 @@ export class FlexSliderCardConfigMngr  {
   }
   
   public get digits(): FlexSliderCardDigits {
-    return this._config.digits!;
+    if (this._config.digits === undefined) {
+      throw new Error("Digits is not defined in config");
+    }
+    return this._config.digits;
   }
 
   public get unit(): string {
-    return this._config.unit!;
+    if (this._config.unit === undefined) {
+      throw new Error("Unit is not defined in config");
+    }
+    return this._config.unit;
   }
 
   public get mintext(): string {
-    return this._config.mintext!;
+    if (this._config.mintext === undefined) {
+      throw new Error("Min text is not defined in config");
+    }
+    return this._config.mintext;
   }
 
   public get maxtext(): string {
-    return this._config.maxtext!;
-  } 
+    if (this._config.maxtext === undefined) {
+      throw new Error("Max text is not defined in config");
+    }
+    return this._config.maxtext;
+  }
 
   /****************************************************/
   /* slider                                           */
   /****************************************************/
 
   protected _checkSlider(): void {
-    if (this._config.min != undefined && typeof this._config.min !== "number") {
-      throw new Error("Invalid min '"+this._config.min+"'");
-    }
-    if (this._config.min == undefined) {
-      this._config.min = 0;
-    }
-    
-    if (this._config.max != undefined && typeof this._config.max !== "number") {
-      throw new Error("Invalid max '"+this._config.max+"'");
-    }
-    if (this._config.max == undefined) {
-      this._config.max = 100;
-    }
+    assertOptionalNumber(this._config.min, "min");
+    this._config.min ??= 0;
 
-    if (this._config.step != undefined && typeof this._config.step !== "number") {
-      throw new Error("Invalid step '"+this._config.step+"'");
-    }
-    if (this._config.step == undefined) {
-      this._config.step = 1;
-    }
+    assertOptionalNumber(this._config.max, "max");
+    this._config.max ??= 100;
+
+    assertOptionalNumber(this._config.step, "step");
+    this._config.step ??= 1;
 
     if (this.entitytype === FlexSliderCardEntityType.TIME) {
       this._config.min = 0;
       this._config.max = 1439;
-      this._config.step = Math.round(this._config.step);
+      this._config.step = Math.max(1, Math.round(this._config.step));
     }
 
+    if (this._config.step <= 0) {
+      throw new Error(`Invalid step '${this._config.step}', expected a number > 0`);
+    }
+
+    if (this._config.min > this._config.max) {
+      throw new Error(`Invalid range: min (${this._config.min}) cannot be greater than max (${this._config.max})`);
+    }
   }
 
-  protected _updateSlider(hass: HomeAssistant): void {
-    return;
-  }
+  protected _updateSlider(hass: HomeAssistant): void {}
 
-  protected _resetSlider(): void {
-    return;
-  }
+  protected _resetSlider(): void {}
 
   public get min(): number {
     return this._config.min!;
@@ -289,7 +277,10 @@ export class FlexSliderCardConfigMngr  {
   }
 
   public get entitytype(): FlexSliderCardEntityType {
-    return this._entitytype!;
+    if (this._entitytype === undefined) {
+      throw new Error("Entity type is not defined in config");
+    }
+    return this._entitytype;
   }
 
   public get entities(): { [suffix: string]: FlexSliderCardEntity } {

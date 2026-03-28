@@ -20,3 +20,21 @@ export function timeToMinutes(time: string): number {
   const [hours, minutes]: number [] = time.split(":").map(Number);
   return hours * 60 + minutes;
 }
+
+export function assertOptionalString(value: unknown, fieldName: string): asserts value is string | undefined | null {
+  if (value != undefined && typeof value !== "string") {
+    throw new Error(`Invalid "${fieldName}": expected string, got ${String(value)}`);
+  }
+}
+
+export function assertOptionalNumber(value: unknown, fieldName: string): asserts value is number | undefined | null {
+  if (value != undefined && typeof value !== "number") {
+    throw new Error(`Invalid "${fieldName}": expected number, got ${String(value)}`);
+  }
+}
+
+export function assertOptionalBoolean(value: unknown, fieldName: string): asserts value is boolean | undefined | null {
+  if (value != undefined && typeof value !== "boolean") {
+    throw new Error(`Invalid "${fieldName}": expected boolean, got ${String(value)}`);
+  }
+}
