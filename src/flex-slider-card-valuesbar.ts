@@ -44,6 +44,10 @@ export class FlexSliderCardValuesBar extends LitElement {
       padding-bottom: var(--flex-slider-card-barvalues-padding-bottom);
       /* border: 1px solid blue; /* Debugging border */
     }
+    .editing {
+      color: var(--primary-color);
+      font-style: italic;
+    }
   `;
 
   /****************************************************/
@@ -61,13 +65,23 @@ export class FlexSliderCardValuesBar extends LitElement {
       return nothing;
     }
 
-    let min = this._minValue;
-    let max = this._maxValue;
-
     return html`
       <div class="valuesbar">
-        <span id="min-value">${min}</span>
-        <span id="max-value">${max}</span>
+        <span>
+          ${this.config?.mintext || ""}
+          <span class=${this._isEditing(0) ? "editing" : ""}>
+            ${this._minValue}
+          </span>
+          ${this.config?.unit || ""}
+        </span>
+
+        <span>
+          ${this.config?.maxtext || ""}
+          <span class=${this._isEditing(1) ? "editing" : ""}>
+            ${this._maxValue}
+          </span>
+          ${this.config?.unit || ""}
+        </span>
       </div>
     `;
     
@@ -104,32 +118,28 @@ export class FlexSliderCardValuesBar extends LitElement {
   /* Private methods - Values Bar                     */
   /****************************************************/
 
+  private _isEditing(handle: number): boolean {
+    return (
+      this._mode === FlexSliderCardValuesBarMode.USERUPDATE &&
+      this._handle === handle
+    );
+  }
   private get _minValue(): string {
-    const mintext = this.config?.mintext || "";
-    const unit = this.config?.unit || "";
-    let minDisplay = null;
     if (this._mode === FlexSliderCardValuesBarMode.USERUPDATE && 
-      this._userModifiedValue && 
+      this._userModifiedValue != undefined && 
       this._handle === 0) {
-      minDisplay = this._sliderToDisplay(this._userModifiedValue);
-    } else {
-      minDisplay = this._sliderToDisplay(this.minvalue);
-    }
-    return `${mintext}${minDisplay}${unit}`;
+      return this._sliderToDisplay(this._userModifiedValue);  // min value is always the first handle (0)
+    }  
+    return this._sliderToDisplay(this.minvalue);
   }
 
   private get _maxValue(): string {
-    const maxtext = this.config?.maxtext || "";
-    const unit = this.config?.unit || "";
-    let maxDisplay = null;
     if (this._mode === FlexSliderCardValuesBarMode.USERUPDATE && 
-      this._userModifiedValue && 
+      this._userModifiedValue != undefined && 
       this._handle === 1) {
-      maxDisplay = this._sliderToDisplay(this._userModifiedValue);
-    } else {
-      maxDisplay = this._sliderToDisplay(this.maxvalue);
-    }    
-    return `${maxtext}${maxDisplay}${unit}`;
+      return this._sliderToDisplay(this._userModifiedValue);
+    }
+    return this._sliderToDisplay(this.maxvalue);
   }
 
   private _sliderToDisplay(value: number): string {
