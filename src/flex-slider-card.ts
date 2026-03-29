@@ -17,7 +17,7 @@ import { assert } from "superstruct";
 // "Add Card" UI picker with a name and description. This array is shared by all
 // custom cards on the page, so we guard with `|| []` before pushing.
 interface WindowWithCustomCards extends Window {
-  customCards: Array<{ type: string; name: string; description: string }>;
+  customCards: Array<{ type: string; name: string; description: string; preview?: boolean }>;
 }
 
 (window as unknown as WindowWithCustomCards).customCards =
