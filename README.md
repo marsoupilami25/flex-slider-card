@@ -1,7 +1,7 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/marsoupilami25/flex-slider-card?display_name=tag)](https://github.com/marsoupilami25/flex-slider-card/releases)
 
-# UI Card for Flex Slider
+# Home Assistant Custom Card for Flex Slider
 
 A custom card for Home Assistant that allows adjusting two `entities` values with a single slider, enabling the selection of a custom value range.  
 
@@ -49,19 +49,20 @@ The compact format with title and bottom values bar:
 ## Options  
 
 ### Display Options
-|Option       |Type           |Domain         |Mandatory|Default       | Description |
-|-------------|---------------|---------------|---------|--------------|-|
-| `name`      | string        |All            |No       |`Range Slider`| Title for the slider. If not configured or `''`, the title is not displayed. |
-| `format`    | string        |All            |No       |`std`         | Format type. Is `std` or `compact`|
-| `unit`      | string        |All            |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
-| `valuesbar` | boolean       |All            |No       |false         | Display a bottom bar with entity values |
+|Option             |Type           |Domain         |Mandatory|Default       | Description |
+|-------------------|---------------|---------------|---------|--------------|-|
+| `name`            | string        |All            |No       |`Range Slider`| Title for the slider. If not configured or `''`, the title is not displayed. |
+| `format`          | string        |All            |No       |`std`         | Format type. Is `std` or `compact`|
+| `unit`            | string        |All            |No       |Empty         | Display unit (e.g., `%`, `°C`, etc.) |
+| `valuesbaractive` | boolean       |All            |No       |false         | Display a bottom bar with entity values |
 
 ### Display Options for values bar
-|Option       |Type           |Domain         |Mandatory|Default       | Description |
-|-------------|---------------|---------------|---------|--------------|-|
-| `mintext`   | string        |All            |No       |Empty         | Text to display before the minimum value. |
-| `maxtext`   | string        |All            |No       |Empty         | Text to display before the maximum value. |
-| `digits`    | string/number |Number only (*)|No       |`auto`        | Number of digits displayed in the bottom value bar. Is a number or `auto`. When `auto` the number of digits is automatically calculated from the step. |
+|Option       |Type             |Domain         |Mandatory|Default | Description |
+|-------------|-----------------|---------------|---------|--------|-|
+| `mintext`   | string          |All            |No       |Empty   | Text to display before the minimum value. |
+| `maxtext`   | string          |All            |No       |Empty   | Text to display before the maximum value. |
+| `digits`    | `auto`/`manual` |Number only (*)|No       |`auto`  | When `auto` the number of digits is automatically calculated from the step. |
+| `nbdigits`  | number          |Number only (*)|No       |Empty   | Number of digits to display when `digits` is set to `manual`. |
 
 ### Behavioral Options
 | Option       | Type   |Domain         |Mandatory|Default       | Description |
@@ -76,33 +77,7 @@ The compact format with title and bottom values bar:
 
 ### Configuration example
 
-Example configuration for **Lovelace UI**:  
-
-```yaml
-type: custom:flex-slider-card
-entity_min: input_number.min_value
-entity_max: input_number.max_value
-min: 0
-max: 100
-step: 1
-unit: '%'
-```
-Compact version
-```yaml
-type: custom:flex-slider-card
-entity_min: input_number.min_value
-entity_max: input_number.max_value
-min: 0
-max: 100
-step: 1
-unit: '%'
-```
-Time version
-```yaml
-type: custom:flex-slider-card
-entity_time_min: input_datetime.time1
-entity_time_max: input_datetime.time2
-```
+From version 2, configuration is fully accessible by thevisual editor.
 
 ### Bugs
 

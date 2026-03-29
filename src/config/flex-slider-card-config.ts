@@ -1,21 +1,22 @@
 import { HomeAssistant } from "custom-card-helpers";
 import { FlexSliderCardEntity, FlexSliderCardEntityType } from "../flex-slider-card-entity";
-import { FlexSliderCardFormat, 
-  FlexSliderCardDigits, 
-  FlexSliderCardConfig, 
-  assertFlexSliderCardFormat, 
-  assertFlexSliderCardDigits} from "./flex-slider-card-config-type";
-import { FlexSliderCardValuesBar } from "../flex-slider-card-valuesbar";
-import { assertOptionalString,
+import {
+  FlexSliderCardDigits,
+  FlexSliderCardConfig,
+  assertFlexSliderCardFormat,
+  assertFlexSliderCardDigits
+} from "./flex-slider-card-config-type";
+import {
+  assertOptionalString,
   assertOptionalNumber,
-assertOptionalBoolean } from "../utils/utils";
+  assertOptionalBoolean
+} from "../utils/utils";
 
-export class FlexSliderCardConfigMngr  {
-  
+export class FlexSliderCardConfigMngr {
+
   private _config: FlexSliderCardConfig;
   private _entities: { [suffix: string]: FlexSliderCardEntity };
   private _entitytype?: FlexSliderCardEntityType;
-  private _valuesBar!: FlexSliderCardValuesBar | undefined;
 
   constructor(config: FlexSliderCardConfig) {
     this._config = structuredClone(config);      // user configuration object
@@ -32,7 +33,7 @@ export class FlexSliderCardConfigMngr  {
   public update(hass: HomeAssistant): void {
     this._updateFormat(hass);
     this._updateTitle(hass);
-    this._updateEntities(hass); 
+    this._updateEntities(hass);
     this._updateSlider(hass);
     this._updateValuesBar(hass);
   }
@@ -40,8 +41,8 @@ export class FlexSliderCardConfigMngr  {
   public reset(): void {
     this._resetFormat();
     this._resetTitle();
-    this._resetEntities(); 
-    this._resetSlider(); 
+    this._resetEntities();
+    this._resetSlider();
     this._resetValuesBar();
   }
 
@@ -56,9 +57,9 @@ export class FlexSliderCardConfigMngr  {
     assertFlexSliderCardFormat(this._config.format);
   }
 
-  protected _updateFormat(hass: HomeAssistant): void {}
+  protected _updateFormat(hass: HomeAssistant): void { }
 
-  protected _resetFormat(): void {}
+  protected _resetFormat(): void { }
 
   public isCompact(): boolean {
     return this._config.format === "compact";
@@ -79,9 +80,9 @@ export class FlexSliderCardConfigMngr  {
     }
   }
 
-  protected _updateTitle(hass: HomeAssistant): void {}
+  protected _updateTitle(hass: HomeAssistant): void { }
 
-  protected _resetTitle(): void {}
+  protected _resetTitle(): void { }
 
   public hasTitle(): boolean {
     return this._config.name !== undefined;
@@ -96,87 +97,86 @@ export class FlexSliderCardConfigMngr  {
   /****************************************************/
 
   protected _checkValuesBar(): void {
-    assertOptionalBoolean(this._config.valuesbar, "valuesbar");
-    if (this._config.valuesbar == undefined) {
-      this._config.valuesbar = false;
+    assertOptionalBoolean(this._config.valuesbaractive, "valuesbar");
+    if (this._config.valuesbaractive == null) {
+      this._config.valuesbaractive = false;
     }
 
-    if (this._config.digits == undefined) {
-      this._config.digits = "auto";
-    }
-    assertFlexSliderCardDigits(this._config.digits);
-    if (this._config.digits === "auto") {
-      this._config.digits = this.step.toString().split(".")[1]?.length || 0; //_checkSlider should have been called before and set a default value for step if it was not defined by the user
+    if (this._config.valuesbar == null) {
+      this._config.valuesbar = {};
     }
 
-    if (this._config.unit == undefined) {
-      this._config.unit = "";
+    if (this._config.valuesbar.digits == null) {
+      this._config.valuesbar.digits = "auto";
+    }
+    assertFlexSliderCardDigits(this._config.valuesbar.digits);
+
+    if (this._config.valuesbar.digits === "auto") {
+      this._config.valuesbar.nbdigits = this.step.toString().split(".")[1]?.length || 0; //_checkSlider should have been called before and set a default value for step if it was not defined by the user
+    }
+    if (this._config.valuesbar.nbdigits == null) {
+      this._config.valuesbar.nbdigits = 0;
+    }
+    assertOptionalNumber(this._config.valuesbar.nbdigits, "nbdigits");
+    if (this._config.valuesbar.nbdigits < 0) {
+      throw new Error("nbdigits must be >= 0");
     }
 
-    assertOptionalString(this._config.mintext, "mintext");
-    if (this._config.mintext == undefined) {
-      this._config.mintext = "";
-    }
-    if (this._config.mintext !== "") {
-      this._config.mintext = this._config.mintext + ": ";
+    if (this._config.valuesbar.unit == null) {
+      this._config.valuesbar.unit = "";
     }
 
-    assertOptionalString(this._config.maxtext, "maxtext");
-    if (this._config.maxtext == undefined) {
-      this._config.maxtext = "";
+    assertOptionalString(this._config.valuesbar.mintext, "mintext");
+    if (this._config.valuesbar.mintext == null) {
+      this._config.valuesbar.mintext = "";
     }
-    if (this._config.maxtext == undefined) {
-      this._config.maxtext = "";
-    }
-    if (this._config.maxtext !== "") {
-      this._config.maxtext = this._config.maxtext + ": ";
+    if (this._config.valuesbar.mintext !== "") {
+      this._config.valuesbar.mintext = this._config.valuesbar.mintext + ":";
     }
 
-    this._valuesBar = undefined; // reference to the values bar object, if it is created
+    assertOptionalString(this._config.valuesbar.maxtext, "maxtext");
+    if (this._config.valuesbar.maxtext == null) {
+      this._config.valuesbar.maxtext = "";
+    }
+    if (this._config.valuesbar.maxtext !== "") {
+      this._config.valuesbar.maxtext = this._config.valuesbar.maxtext + ":";
+    }
   }
 
-  protected _updateValuesBar(hass: HomeAssistant): void {}
+  protected _updateValuesBar(hass: HomeAssistant): void { }
 
-  protected _resetValuesBar(): void {}
+  protected _resetValuesBar(): void { }
 
   public hasValuesBar(): boolean {
-    return (this._config.valuesbar === true);
+    return (this._config.valuesbaractive === true);
   }
 
-  public set valuesBar(valuesBar: FlexSliderCardValuesBar | undefined) {
-    this._valuesBar = valuesBar;
-  }
-
-  public get valuesBar(): FlexSliderCardValuesBar | undefined {
-    return this._valuesBar;
-  }
-  
-  public get digits(): FlexSliderCardDigits {
-    if (this._config.digits === undefined) {
+  public get nbdigits(): number {
+    if (this._config.valuesbar?.nbdigits == null) {
       throw new Error("Digits is not defined in config");
     }
-    return this._config.digits;
+    return this._config.valuesbar.nbdigits;
   }
 
   public get unit(): string {
-    if (this._config.unit === undefined) {
+    if (this._config.valuesbar?.unit == null) {
       throw new Error("Unit is not defined in config");
     }
-    return this._config.unit;
+    return this._config.valuesbar.unit;
   }
 
   public get mintext(): string {
-    if (this._config.mintext === undefined) {
+    if (this._config.valuesbar?.mintext == null) {
       throw new Error("Min text is not defined in config");
     }
-    return this._config.mintext;
+    return this._config.valuesbar.mintext;
   }
 
   public get maxtext(): string {
-    if (this._config.maxtext === undefined) {
+    if (this._config.valuesbar?.maxtext == null) {
       throw new Error("Max text is not defined in config");
     }
-    return this._config.maxtext;
+    return this._config.valuesbar.maxtext;
   }
 
   /****************************************************/
@@ -208,9 +208,9 @@ export class FlexSliderCardConfigMngr  {
     }
   }
 
-  protected _updateSlider(hass: HomeAssistant): void {}
+  protected _updateSlider(hass: HomeAssistant): void { }
 
-  protected _resetSlider(): void {}
+  protected _resetSlider(): void { }
 
   public get min(): number {
     return this._config.min!;
@@ -239,7 +239,7 @@ export class FlexSliderCardConfigMngr  {
   }
 
   protected _checkEntities(): void {
-    
+
     if (!this._config.entity_min || !this._config.entity_max) {
       throw new Error("You need to define 'entity_min' and 'entity_max'");
     }
@@ -294,7 +294,7 @@ export class FlexSliderCardConfigMngr  {
   public entitiesResetBaseline(): void {
     Object.values(this._entities).forEach(entity => entity.resetBaseline());
   }
-  
+
   public entitiesSetBaseline(): void {
     Object.values(this._entities).forEach(entity => entity.setBaseline());
   }

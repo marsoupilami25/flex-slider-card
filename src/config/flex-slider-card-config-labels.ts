@@ -1,0 +1,15 @@
+export const flexSliderCardConfigLabels: Record<string, string> = {
+  name: "Name",
+  format: "Format",
+  valuesbaractive: "Enable values bar",
+  entity_min: "Entity for minimum",
+  entity_max: "Entity for maximum",
+  min: "Min",
+  max: "Max",
+  step: "Step",
+  unit: "Unit", 
+  digits: "Digits Mode",
+  nbdigits: "Number of Digits",
+  mintext: "Text for min value",
+  maxtext: "Text for max value",
+};

@@ -144,7 +144,7 @@ export class FlexSliderCardValuesBar extends LitElement {
 
   private _sliderToDisplay(value: number): string {
     if (this.config?.entitytype === FlexSliderCardEntityType.NUMBER) {
-      return Number(value).toFixed(Number(this.config.digits));
+      return Number(value).toFixed(Number(this.config.nbdigits));
     }
     if (this.config?.entitytype === FlexSliderCardEntityType.TIME) {
       return minutesToTime(value);
