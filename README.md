@@ -40,6 +40,7 @@ A Home Assistant custom card that controls one or more entities from a single sl
 - Visual editor support   
 ![Visual editor](/assets/configuration.png)   
 - `card-mod` compatible   
+- Supports `number`, `input_number`, time-only `input_datetime`, and `cover` entities
 
 ## Version Notes
 
@@ -147,6 +148,27 @@ bubbles:
 Both `input_datetime` entities must be time-only (`has_time: true`, `has_date: false`).
 For this domain, `min` and `max` are ignored and `step` is rounded to whole minutes.
 
+### Cover Example
+
+```yaml
+type: custom:flex-slider-card
+name: Living room cover
+entities:
+  - entity: cover.living_room
+    text: Position
+min: 0
+max: 100
+step: 1
+bubblesactive: true
+bubbles:
+  unit: "%"
+  showtext: true
+```
+
+`cover` entities use the `current_position` attribute and are updated through the `cover.set_cover_position` service.
+The range must stay between `0` and `100`; sent positions are rounded to whole numbers.
+Multiple `cover` entities can be used when you intentionally want to compare or control several cover positions on the same scale.
+
 ### Reference Entity Example
 
 ```yaml
@@ -249,9 +271,9 @@ ticks:
 
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `min` | number | No | `0` | Minimum slider value for `number` and `input_number` |
-| `max` | number | No | `100` | Maximum slider value for `number` and `input_number` |
-| `step` | number | No | `1` | Slider step. Must be `> 0`. For `input_datetime`, rounded to whole minutes |
+| `min` | number | No | `0` | Minimum slider value for `number`, `input_number`, and `cover`. For `cover`, must be between `0` and `100`. Ignored for `input_datetime` |
+| `max` | number | No | `100` | Maximum slider value for `number`, `input_number`, and `cover`. For `cover`, must be between `0` and `100`. Ignored for `input_datetime` |
+| `step` | number | No | `1` | Slider step. Must be `> 0`. For `input_datetime`, rounded to whole minutes. For `cover`, sent positions are rounded to whole numbers |
 | `direction` | `ltr` \| `rtl` | No | `ltr` | Slider direction |
 
 ### `bubbles` Options
@@ -360,7 +382,9 @@ Rules:
 Rules:
 - All configured entities must be unique.
 - All configured entities must use compatible domains.
+- `number` and `input_number` entities can be mixed together.
 - `input_datetime` entities must all be time-only.
+- `cover` entities can only be used with other `cover` entities.
 - When only one handle is configured, `connectprevious` defaults to `true`.
 - With multiple handles, `connectprevious` defaults to `false` for the first handle and `true` for the others.
 
@@ -373,6 +397,7 @@ Legacy `entity_min` and `entity_max` are still accepted for backward compatibili
 | `number` | Yes | Uses configured `min`, `max`, and `step` |
 | `input_number` | Yes | Uses configured `min`, `max`, and `step` |
 | `input_datetime` | Yes | Only time-only entities are supported. Range is always `00:00` to `23:59`; `min` and `max` are ignored |
+| `cover` | Yes | Uses the `current_position` attribute and calls `cover.set_cover_position`. Range must stay between `0` and `100`; sent positions are rounded |
 
 ## Vertical Mode
 
