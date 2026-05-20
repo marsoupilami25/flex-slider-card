@@ -8,14 +8,14 @@ import {
   isNumericEntityType,
 } from "./utils/entity-management";
 
-export enum FlexSliderCardDataType {
-  VALUE = "value",
-  TIME = "time",
-  POSITION = "position"
-}
-
 export type FlexSliderCardValueType = number | string;
 type FlexSliderCardState = HomeAssistant["states"][string];
+type FlexSliderCardServiceData = Record<string, FlexSliderCardValueType>;
+type FlexSliderCardServiceCall = {
+  domain: FlexSliderEntityDomain;
+  service: FlexSliderCardService;
+  data: FlexSliderCardServiceData;
+};
 
 type FlexSliderCardService = "set_value" | "set_datetime" | "set_cover_position";
 
@@ -29,7 +29,6 @@ export class FlexSliderCardEntity {
   private _baselineValue: number | undefined = undefined;
   private _callService: HomeAssistant["callService"] | null = null;
   private _state: FlexSliderCardState | undefined;
-  private _datatype!: FlexSliderCardDataType;
 
   constructor(entityId: string, text = "") {
     this._entityid = entityId;
@@ -38,15 +37,12 @@ export class FlexSliderCardEntity {
     this._entitytype = getEntityType(this._entityid);
     switch (this._entitytype) {
       case FlexSliderCardEntityType.NUMBER:
-        this._datatype = FlexSliderCardDataType.VALUE;
         this._service = "set_value";
         break;
       case FlexSliderCardEntityType.TIME:
-        this._datatype = FlexSliderCardDataType.TIME;
         this._service = "set_datetime";
         break;
       case FlexSliderCardEntityType.COVER:
-        this._datatype = FlexSliderCardDataType.POSITION;
         this._service = "set_cover_position";
         break;
       default:
@@ -83,10 +79,6 @@ export class FlexSliderCardEntity {
     return this._entityid;
   }
 
-  public get datatype(): FlexSliderCardDataType {
-    return this._datatype
-  }
-
   public toText(sliderValue: number, nbdigits: number, unit = "", showText = true): string {
     const value = this.toDisplay(sliderValue, nbdigits);
 
@@ -117,14 +109,17 @@ export class FlexSliderCardEntity {
   /****************************************************/
 
   public async setSliderValue(newSliderValue: number): Promise<void> {
-    const havalue: FlexSliderCardValueType = this._toEntity(newSliderValue);
     if (!this._callService) {
       throw new Error("Hass callService not initialized");
     }
-    await this._callService(this.domain, this.service, {
-      entity_id: this.entityId,
-      [this.datatype]: havalue
-    });
+
+    const serviceCall = this._getServiceCall(newSliderValue);
+    await this._callService(
+      serviceCall.domain,
+      serviceCall.service,
+      serviceCall.data,
+      { entity_id: this.entityId },
+    );
   }
 
   /****************************************************/
@@ -179,22 +174,41 @@ export class FlexSliderCardEntity {
 
   private _getStateValue(state: FlexSliderCardState): FlexSliderCardValueType {
     if (this._entitytype === FlexSliderCardEntityType.COVER) {
-      return state.attributes.current_position as FlexSliderCardValueType;
+      const currentPosition = state.attributes.current_position;
+      if (typeof currentPosition !== "number") {
+        throw new Error(`Cover entity '${this.entityId}' does not expose a numeric current_position`);
+      }
+      return currentPosition;
     }
 
     return state.state;
   }
-  
-  private _toEntity(sliderValue: number): FlexSliderCardValueType {
-    if (isNumericEntityType(this._entitytype)) {
-      return Number(sliderValue);
-    }
-    if (this._entitytype === FlexSliderCardEntityType.TIME) {
-      return minutesToTime(sliderValue);
-    }
-    throw new Error(`Unexpected entity type '${this._entitytype}'`);
-  }
 
+  private _getServiceCall(sliderValue: number): FlexSliderCardServiceCall {
+    switch (this._entitytype) {
+      case FlexSliderCardEntityType.NUMBER:
+        return {
+          domain: this.domain,
+          service: "set_value",
+          data: { value: Number(sliderValue) },
+        };
+      case FlexSliderCardEntityType.TIME:
+        return {
+          domain: this.domain,
+          service: "set_datetime",
+          data: { time: minutesToTime(sliderValue) },
+        };
+      case FlexSliderCardEntityType.COVER:
+        return {
+          domain: this.domain,
+          service: "set_cover_position",
+          data: { position: Math.round(sliderValue) },
+        };
+      default:
+        throw new Error(`Unexpected entity type '${this._entitytype}'`);
+    }
+  }
+  
   private _fromEntity(entityValue: FlexSliderCardValueType): number {
     if (isNumericEntityType(this._entitytype)) {
       return Number(entityValue);

@@ -570,7 +570,10 @@ export class FlexSliderCardSlider extends LitElement {
   private _sliderToPips(value: number): string {
     let valueToDisplay: string = "";
 
-    if (this.config?.entitytype === FlexSliderCardEntityType.NUMBER) {
+    if (
+      this.config?.entitytype === FlexSliderCardEntityType.NUMBER ||
+      this.config?.entitytype === FlexSliderCardEntityType.COVER
+    ) {
       valueToDisplay = Number(value).toFixed(Number(this.config.nbdigitsTicks));
     } else if (this.config?.entitytype === FlexSliderCardEntityType.TIME) {
       valueToDisplay = minutesToTime(value);
