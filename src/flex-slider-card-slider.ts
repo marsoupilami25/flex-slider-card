@@ -56,14 +56,6 @@ export class FlexSliderCardSlider extends LitElement {
   private _valuesBarSetValue: FlexSliderCardValuesBarSetValueCallback | null = null;
   private _pressStartTime = 0;
 
-  private _emitUserUpdateStateChanged(isUserUpdating: boolean): void {
-    this.dispatchEvent(new CustomEvent("user-update-state-changed", {
-      detail: { isUserUpdating },
-      bubbles: true,
-      composed: true,
-    }));
-  }
-
   static override styles = css`
     ${unsafeCSS(nouiCss)}
     
@@ -318,6 +310,14 @@ export class FlexSliderCardSlider extends LitElement {
   /* CallBacks                                        */
   /****************************************************/
 
+  private _emitUserUpdateStateChanged(isUserUpdating: boolean): void {
+    this.dispatchEvent(new CustomEvent("user-update-state-changed", {
+      detail: { isUserUpdating },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   private _onStart(handle: number): void {
     if (this.disabled) {
       return;
@@ -369,10 +369,7 @@ export class FlexSliderCardSlider extends LitElement {
       }
     } catch (error) {
       this._syncSliderToEntityValues();
-      const message =
-        error instanceof Error
-          ? error.message
-          : `Error occurred while updating slider values: ${String(error)}`;
+      const message = FlexSliderCardSlider._getErrorMessage(error);
       fireEvent(this, "hass-notification" as any, { message });
     } finally {
       this._isSyncing = false;
@@ -424,6 +421,23 @@ export class FlexSliderCardSlider extends LitElement {
   /****************************************************/
   /* Private methods                                  */
   /****************************************************/
+
+  private static _getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof error.message === "string"
+    ) {
+      return error.message;
+    }
+
+    return `Error occurred while updating slider values: ${String(error)}`;
+  }
 
   private _syncSliderToEntityValues(): void {
     const values = this.config.hasReference
