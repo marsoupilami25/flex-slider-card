@@ -370,6 +370,7 @@ export class FlexSliderCardSlider extends LitElement {
         await this._commitChangedValuesInOrder(currentValues, nextValues, changedIndexes);
       }
     } catch (error) {
+      this._syncSliderToEntityValues();
       const message =
         error instanceof Error
           ? error.message
@@ -436,6 +437,19 @@ export class FlexSliderCardSlider extends LitElement {
     if (this._startValues) {
       this._slider.set(this._startValues, false);
     }
+  }
+
+  private _syncSliderToEntityValues(): void {
+    const values = this.config.hasReference
+      ? [
+          ...this.config.entities.map((entity) => entity.sliderValue),
+          this.config.max,
+          this.config.referenceEntity.sliderValue,
+        ]
+      : this.config.entities.map((entity) => entity.sliderValue);
+
+    this._slider.set(values, false);
+    this._valuesBarSetValue?.(values.slice(0, this.config.entityCount));
   }
 
   private async _commitChangedValues(
