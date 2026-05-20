@@ -55,7 +55,6 @@ export class FlexSliderCardSlider extends LitElement {
   private _valuesBarSetMode: FlexSliderCardValuesBarSetModeCallback | null = null;
   private _valuesBarSetValue: FlexSliderCardValuesBarSetValueCallback | null = null;
   private _pressStartTime = 0;
-  private _startValues: number[] | null = null;
 
   private _emitUserUpdateStateChanged(isUserUpdating: boolean): void {
     this.dispatchEvent(new CustomEvent("user-update-state-changed", {
@@ -329,7 +328,6 @@ export class FlexSliderCardSlider extends LitElement {
     }
 
     debuglog(`slider start ${handle}`);
-    this._startValues = this._getSliderValues();
     this._pressStartTime = Date.now();
 
     this._userIsUpdating = true;
@@ -341,7 +339,7 @@ export class FlexSliderCardSlider extends LitElement {
     debuglog("slider change");
     debuglog(`delay: ${Date.now() - this._pressStartTime}`);
     if (Date.now() - this._pressStartTime < PRESS_CONFIRM_DELAY_MS) {
-      this._restoreStartValues();
+      this._syncSliderToEntityValues();
       this._valuesBarSetMode?.(FlexSliderCardValuesBarMode.DEFAULT);
       return;
     }
@@ -417,7 +415,6 @@ export class FlexSliderCardSlider extends LitElement {
   private _onEnd(): void {
     debuglog("slider end");
     this._pressStartTime = 0;
-    this._startValues = null;
     this._userIsUpdating = false;
     this._emitUserUpdateStateChanged(false);
     if (this._isSyncing) return;
@@ -427,17 +424,6 @@ export class FlexSliderCardSlider extends LitElement {
   /****************************************************/
   /* Private methods                                  */
   /****************************************************/
-
-  private _getSliderValues(): number[] {
-    const values = this._slider.get(true);
-    return Array.isArray(values) ? values.map(Number) : [Number(values)];
-  }
-
-  private _restoreStartValues(): void {
-    if (this._startValues) {
-      this._slider.set(this._startValues, false);
-    }
-  }
 
   private _syncSliderToEntityValues(): void {
     const values = this.config.hasReference
