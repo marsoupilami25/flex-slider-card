@@ -40,7 +40,7 @@ export class FlexSliderCardConfigMngr {
     this._config = structuredClone(config);      // user configuration object
     this._entities = [];        // entities objects ordered like handles in config.entities
     this._referenceEntity = undefined; // optional non-editable reference handle
-    this._entitytype = undefined;    // entity type: "number" or "time", shared by all handles
+    this._entitytype = undefined;    // entity type: "number", "time", or "cover", shared by all handles
 
     this._checkFormat();
     this._checkTitle();
@@ -408,6 +408,8 @@ export class FlexSliderCardConfigMngr {
     if (getEntityType(this._config.reference.entity) !== this.entitytype) {
       const expectedDomains = this.entitytype === FlexSliderCardEntityType.TIME
         ? "input_datetime"
+        : this.entitytype === FlexSliderCardEntityType.COVER
+          ? "cover"
         : "number or input_number";
       throw new Error(`Reference entity must use compatible domains. Expected: ${expectedDomains}`);
     }
@@ -515,6 +517,14 @@ export class FlexSliderCardConfigMngr {
       this._config.min = 0;
       this._config.max = 1439;
       this._config.step = Math.max(1, Math.round(this._config.step));
+    }
+    if (this.entitytype === FlexSliderCardEntityType.COVER) {
+      if (this._config.min < 0 || this._config.min > 100) {
+        throw new Error(`Invalid cover range: min (${this._config.min}) must be between 0 and 100`);
+      }
+      if (this._config.max < 0 || this._config.max > 100) {
+        throw new Error(`Invalid cover range: max (${this._config.max}) must be between 0 and 100`);
+      }
     }
 
     if (this._config.step <= 0) {

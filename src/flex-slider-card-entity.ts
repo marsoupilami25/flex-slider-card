@@ -1,16 +1,23 @@
 import { timeToMinutes, minutesToTime } from "./utils/utils";
 import { HomeAssistant } from "custom-card-helpers";
-import { FlexSliderCardEntityType, FlexSliderEntityDomain, getEntityDomain, getEntityType} from "./utils/entity-management";
+import {
+  FlexSliderCardEntityType,
+  FlexSliderEntityDomain,
+  getEntityDomain,
+  getEntityType,
+  isNumericEntityType,
+} from "./utils/entity-management";
 
 export enum FlexSliderCardDataType {
   VALUE = "value",
-  TIME = "time"
+  TIME = "time",
+  POSITION = "position"
 }
 
 export type FlexSliderCardValueType = number | string;
 type FlexSliderCardState = HomeAssistant["states"][string];
 
-type FlexSliderCardService = "set_value" | "set_datetime";
+type FlexSliderCardService = "set_value" | "set_datetime" | "set_cover_position";
 
 export class FlexSliderCardEntity {
   
@@ -37,6 +44,10 @@ export class FlexSliderCardEntity {
       case FlexSliderCardEntityType.TIME:
         this._datatype = FlexSliderCardDataType.TIME;
         this._service = "set_datetime";
+        break;
+      case FlexSliderCardEntityType.COVER:
+        this._datatype = FlexSliderCardDataType.POSITION;
+        this._service = "set_cover_position";
         break;
       default:
         throw new Error(`Unexpected entity domain for '${this._entityid}'`);
@@ -83,7 +94,7 @@ export class FlexSliderCardEntity {
   }
 
   public toDisplay(sliderValue: number, nbdigits: number): string {
-    if (this._entitytype === FlexSliderCardEntityType.NUMBER) {
+    if (isNumericEntityType(this._entitytype)) {
       return Number(sliderValue).toFixed(nbdigits);
     }
     if (this._entitytype === FlexSliderCardEntityType.TIME) {
@@ -94,7 +105,7 @@ export class FlexSliderCardEntity {
 
   public get sliderValue(): number {
     const state = this._getState();
-    return this._fromEntity(state.state);
+    return this._fromEntity(this._getStateValue(state));
   }
 
   public exists(): boolean {
@@ -165,9 +176,17 @@ export class FlexSliderCardEntity {
       `has_date: ${String(state.attributes.has_date)}`
     );
   }
+
+  private _getStateValue(state: FlexSliderCardState): FlexSliderCardValueType {
+    if (this._entitytype === FlexSliderCardEntityType.COVER) {
+      return state.attributes.current_position as FlexSliderCardValueType;
+    }
+
+    return state.state;
+  }
   
   private _toEntity(sliderValue: number): FlexSliderCardValueType {
-    if (this._entitytype === FlexSliderCardEntityType.NUMBER) {
+    if (isNumericEntityType(this._entitytype)) {
       return Number(sliderValue);
     }
     if (this._entitytype === FlexSliderCardEntityType.TIME) {
@@ -177,7 +196,7 @@ export class FlexSliderCardEntity {
   }
 
   private _fromEntity(entityValue: FlexSliderCardValueType): number {
-    if (this._entitytype === FlexSliderCardEntityType.NUMBER) {
+    if (isNumericEntityType(this._entitytype)) {
       return Number(entityValue);
     }
     if (this._entitytype === FlexSliderCardEntityType.TIME) {
