@@ -1,6 +1,10 @@
 import memoizeOne from "memoize-one";
 import { HaFormSchema } from "../type/ha";
-import { FlexSliderCardEntityType } from "../utils/entity-management";
+import {
+  FlexSliderCardEntityType,
+  FLEX_SLIDER_ENTITY_DOMAINS,
+  FLEX_SLIDER_NUMBER_ENTITY_DOMAINS,
+} from "../utils/entity-management";
 
 // The form only supports an inclusive minimum, while runtime validation requires step > 0.
 const MIN_POSITIVE_STEP_FOR_FORM = 0.000001;
@@ -341,9 +345,11 @@ const referenceSchema = memoizeOne((
 ): HaFormSchema[] => {
   const domains = selectedEntityType === FlexSliderCardEntityType.TIME
     ? ["input_datetime"]
+    : selectedEntityType === FlexSliderCardEntityType.COVER
+      ? ["cover"]
     : selectedEntityType === FlexSliderCardEntityType.NUMBER
-      ? ["number", "input_number"]
-      : ["number", "input_number", "input_datetime"];
+      ? FLEX_SLIDER_NUMBER_ENTITY_DOMAINS
+      : FLEX_SLIDER_ENTITY_DOMAINS;
 
   return [{
     type: "expandable",
@@ -428,7 +434,7 @@ export const handleSchema: HaFormSchema[] = [
     required: false,
     selector: {
       entity: {
-        domain: ["number", "input_number", "input_datetime"],
+        domain: FLEX_SLIDER_ENTITY_DOMAINS,
       }
     },
   },

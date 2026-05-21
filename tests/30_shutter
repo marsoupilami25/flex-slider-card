@@ -1,0 +1,48 @@
+type: sections
+max_columns: 4
+title: shutter
+path: shutter
+sections:
+  - type: grid
+    cards:
+      - type: custom:enhanced-shutter-card
+        entities:
+          - entity: cover.volettest
+            name: My First Enhanced Shutter Card
+            top_offset_pct: 13
+            button_up_hide_states:
+              - open
+              - opening
+              - closing
+            button_stop_hide_states:
+              - open
+              - closed
+              - partial_open
+            button_down_hide_states:
+              - closed
+              - opening
+              - closing
+      - type: entity
+        entity: cover.volettest
+        attribute: current_position
+      - type: entity
+        entity: cover.volettest
+      - type: custom:flex-slider-card
+        name: Flex Slider
+        format: std
+        valuesbaractive: true
+        valuesbar:
+          digits: auto
+        step: 1
+        entities:
+          - entity: cover.volettest
+            text: ""
+            connectprevious: false
+        orientation: horizontal
+        direction: rtl
+        connectend: true
+        max: 90
+        min: 10
+        bubblesactive: true
+        referenceactive: false
+        ticksactive: true

@@ -55,15 +55,6 @@ export class FlexSliderCardSlider extends LitElement {
   private _valuesBarSetMode: FlexSliderCardValuesBarSetModeCallback | null = null;
   private _valuesBarSetValue: FlexSliderCardValuesBarSetValueCallback | null = null;
   private _pressStartTime = 0;
-  private _startValues: number[] | null = null;
-
-  private _emitUserUpdateStateChanged(isUserUpdating: boolean): void {
-    this.dispatchEvent(new CustomEvent("user-update-state-changed", {
-      detail: { isUserUpdating },
-      bubbles: true,
-      composed: true,
-    }));
-  }
 
   static override styles = css`
     ${unsafeCSS(nouiCss)}
@@ -319,6 +310,14 @@ export class FlexSliderCardSlider extends LitElement {
   /* CallBacks                                        */
   /****************************************************/
 
+  private _emitUserUpdateStateChanged(isUserUpdating: boolean): void {
+    this.dispatchEvent(new CustomEvent("user-update-state-changed", {
+      detail: { isUserUpdating },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   private _onStart(handle: number): void {
     if (this.disabled) {
       return;
@@ -329,7 +328,6 @@ export class FlexSliderCardSlider extends LitElement {
     }
 
     debuglog(`slider start ${handle}`);
-    this._startValues = this._getSliderValues();
     this._pressStartTime = Date.now();
 
     this._userIsUpdating = true;
@@ -341,7 +339,7 @@ export class FlexSliderCardSlider extends LitElement {
     debuglog("slider change");
     debuglog(`delay: ${Date.now() - this._pressStartTime}`);
     if (Date.now() - this._pressStartTime < PRESS_CONFIRM_DELAY_MS) {
-      this._restoreStartValues();
+      this._syncSliderToEntityValues();
       this._valuesBarSetMode?.(FlexSliderCardValuesBarMode.DEFAULT);
       return;
     }
@@ -370,10 +368,8 @@ export class FlexSliderCardSlider extends LitElement {
         await this._commitChangedValuesInOrder(currentValues, nextValues, changedIndexes);
       }
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : `Error occurred while updating slider values: ${String(error)}`;
+      this._syncSliderToEntityValues();
+      const message = FlexSliderCardSlider._getErrorMessage(error);
       fireEvent(this, "hass-notification" as any, { message });
     } finally {
       this._isSyncing = false;
@@ -416,7 +412,6 @@ export class FlexSliderCardSlider extends LitElement {
   private _onEnd(): void {
     debuglog("slider end");
     this._pressStartTime = 0;
-    this._startValues = null;
     this._userIsUpdating = false;
     this._emitUserUpdateStateChanged(false);
     if (this._isSyncing) return;
@@ -427,15 +422,34 @@ export class FlexSliderCardSlider extends LitElement {
   /* Private methods                                  */
   /****************************************************/
 
-  private _getSliderValues(): number[] {
-    const values = this._slider.get(true);
-    return Array.isArray(values) ? values.map(Number) : [Number(values)];
+  private static _getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof error.message === "string"
+    ) {
+      return error.message;
+    }
+
+    return `Error occurred while updating slider values: ${String(error)}`;
   }
 
-  private _restoreStartValues(): void {
-    if (this._startValues) {
-      this._slider.set(this._startValues, false);
-    }
+  private _syncSliderToEntityValues(): void {
+    const values = this.config.hasReference
+      ? [
+          ...this.config.entities.map((entity) => entity.sliderValue),
+          this.config.max,
+          this.config.referenceEntity.sliderValue,
+        ]
+      : this.config.entities.map((entity) => entity.sliderValue);
+
+    this._slider.set(values, false);
+    this._valuesBarSetValue?.(values.slice(0, this.config.entityCount));
   }
 
   private async _commitChangedValues(
@@ -556,7 +570,10 @@ export class FlexSliderCardSlider extends LitElement {
   private _sliderToPips(value: number): string {
     let valueToDisplay: string = "";
 
-    if (this.config?.entitytype === FlexSliderCardEntityType.NUMBER) {
+    if (
+      this.config?.entitytype === FlexSliderCardEntityType.NUMBER ||
+      this.config?.entitytype === FlexSliderCardEntityType.COVER
+    ) {
       valueToDisplay = Number(value).toFixed(Number(this.config.nbdigitsTicks));
     } else if (this.config?.entitytype === FlexSliderCardEntityType.TIME) {
       valueToDisplay = minutesToTime(value);

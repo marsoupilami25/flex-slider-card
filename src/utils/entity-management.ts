@@ -1,9 +1,27 @@
 export enum FlexSliderCardEntityType {
   NUMBER = "number",
-  TIME = "time"
+  TIME = "time",
+  COVER = "cover"
 }
 
-export type FlexSliderEntityDomain = "number" | "input_number" | "input_datetime";
+export type FlexSliderEntityDomain = "number" | "input_number" | "input_datetime" | "cover";
+
+export const FLEX_SLIDER_ENTITY_DOMAINS: FlexSliderEntityDomain[] = [
+  "number",
+  "input_number",
+  "input_datetime",
+  "cover",
+];
+
+export const FLEX_SLIDER_NUMBER_ENTITY_DOMAINS: FlexSliderEntityDomain[] = [
+  "number",
+  "input_number",
+];
+
+export function isNumericEntityType(entityType: FlexSliderCardEntityType): boolean {
+  return entityType === FlexSliderCardEntityType.NUMBER ||
+    entityType === FlexSliderCardEntityType.COVER;
+}
 
 export function isValidEntityId(entity: unknown): entity is string {
   if (typeof entity !== "string") {
@@ -28,6 +46,8 @@ export function getEntityType(entityid: string): FlexSliderCardEntityType {
       return FlexSliderCardEntityType.NUMBER;
     case "input_datetime":
       return FlexSliderCardEntityType.TIME;
+    case "cover":
+      return FlexSliderCardEntityType.COVER;
     default:
       throw new Error(`Unexpected 'entity_${entityid}' domain`);
   }
