@@ -1,6 +1,6 @@
 {
   "name": "flex-slider-card",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A slider **custom card** for Home Assistant.",
   "main": "index.js",
   "scripts": {
