@@ -8,6 +8,7 @@ You need to create the following entities:
 - `input_number.inputnumbertestref`
 - `input_datetime.inputheuretestmin`
 - `input_datetime.inputheuretestmax`
+- `cover.volettest`
 
 The `input_datetime` test entities must be configured as time-only:
 - `has_date: false`
@@ -73,7 +74,10 @@ Focused views are also available for specific options:
 - `18_vertical_masonry_verticallayout.yml`
 - `22_vertical_masonry_handlesbehavior.yml`
 - `23_adaptive_state.yml`
+- `30_shutter`
 
 `07_horizontal_masonry_card_mod.yml` requires `card-mod` to be installed in the test environment.
+
+`30_shutter` requires `enhanced-shutter-card` to be installed in the test environment and uses `cover.volettest`.
 
 Warning: two entities from `number` domain are used: `number.bureaucontrole_chauffagetempcftmin` and `number.bureaucontrole_chauffagetempcftmax`. They are used to test the `number` domain is working well but should be replaced by existing entities from `number` domain in the test environment.
