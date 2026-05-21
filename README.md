@@ -81,175 +81,7 @@ Nevertheless legacy keys such as `entity_min`, `entity_max`, `valuesbar.mintext`
 
 The card can be configured from the visual editor or with YAML.
 
-### Basic example
-
-```yaml
-type: custom:flex-slider-card
-name: Heating band
-entities:
-  - entity: input_number.heating_min
-    text: Min
-  - entity: input_number.heating_target
-    text: Target
-  - entity: input_number.heating_max
-    text: Max
-min: 18
-max: 24
-step: 0.5
-valuesbaractive: true
-bubblesactive: true
-ticksactive: true
-handlesbehavior: fixed
-valuesbar:
-  unit: C
-  showtext: true
-bubbles:
-  unit: C
-  showtext: true
-ticks:
-  majorticks: 4
-  minorticks: 1
-```
-
-### Single-Handle Example
-
-```yaml
-type: custom:flex-slider-card
-name: Comfort target
-entities:
-  - entity: input_number.temperature_target
-min: 18
-max: 30
-step: 0.5
-valuesbaractive: true
-valuesbar:
-  unit: C
-```
-
-### Time Example
-
-```yaml
-type: custom:flex-slider-card
-name: Heating schedule
-entities:
-  - entity: input_datetime.heating_start
-    text: Start
-  - entity: input_datetime.heating_end
-    text: End
-valuesbaractive: true
-bubblesactive: true
-step: 15
-direction: ltr
-bubbles:
-  dragonly: true
-  showtext: true
-```
-
-Both `input_datetime` entities must be time-only (`has_time: true`, `has_date: false`).
-For this domain, `min` and `max` are ignored and `step` is rounded to whole minutes.
-
-### Cover Example
-
-```yaml
-type: custom:flex-slider-card
-name: Living room cover
-entities:
-  - entity: cover.living_room
-    text: Position
-min: 0
-max: 100
-step: 1
-bubblesactive: true
-bubbles:
-  unit: "%"
-  showtext: true
-```
-
-`cover` entities use the `current_position` attribute and are updated through the `cover.set_cover_position` service.
-The range must stay between `0` and `100`; sent positions are rounded to whole numbers.
-Multiple `cover` entities can be used when you intentionally want to compare or control several cover positions on the same scale.
-
-### Reference Entity Example
-
-```yaml
-type: custom:flex-slider-card
-name: Heating target
-entities:
-  - entity: input_number.temperature_min
-    text: Min
-  - entity: input_number.temperature_max
-    text: Max
-min: 18
-max: 30
-step: 0.5
-bubblesactive: true
-referenceactive: true
-reference:
-  entity: input_number.temperature_current
-  text: Current
-  bubble: true
-  valuesbar: false
-  unit: C
-```
-
-The reference entity is displayed as a read-only handle on the same slider scale.
-It must use a domain compatible with the slider entities.
-
-### Adaptive State Example
-
-```yaml
-type: custom:flex-slider-card
-name: Heating window
-entities:
-  - entity: input_number.heating_min
-    text: Min
-  - entity: input_number.heating_max
-    text: Max
-min: 18
-max: 24
-step: 0.5
-valuesbaractive: true
-adaptivestateactive: true
-adaptivestate:
-  conditions:
-    - condition: numeric_state
-      entity: sensor.current_temperature
-      below: 22
-  editablewhenlinkedinactive: false
-```
-
-When the adaptive state conditions are true, the card behaves normally.
-When they are false, the card is shown as inactive and the slider is disabled unless `editablewhenlinkedinactive: true` is set.
-
-Warning: depending on the layout and enabled slider decorations, the adaptive state LED can overlap the slider.
-
-### Vertical Example
-
-```yaml
-type: custom:flex-slider-card
-name: Temperature band
-entities:
-  - entity: input_number.temperature_min
-    text: Min
-  - entity: input_number.temperature_max
-    text: Max
-min: 18
-max: 30
-step: 0.5
-orientation: vertical
-verticalheight: 3
-verticallayout: mirrored
-bubblesactive: true
-ticksactive: true
-bubbles:
-  unit: C
-  showtext: true
-ticks:
-  majorticks: 5
-  minorticks: 2
-```
-
-## Options
+## YAML Options
 
 ### Main Options
 
@@ -439,3 +271,173 @@ If the card does not appear in Home Assistant:
 ## Contributing
 
 Issues and pull requests are welcome.
+
+## Examples
+
+### Basic example
+
+```yaml
+type: custom:flex-slider-card
+name: Heating band
+entities:
+  - entity: input_number.heating_min
+    text: Min
+  - entity: input_number.heating_target
+    text: Target
+  - entity: input_number.heating_max
+    text: Max
+min: 18
+max: 24
+step: 0.5
+valuesbaractive: true
+bubblesactive: true
+ticksactive: true
+handlesbehavior: fixed
+valuesbar:
+  unit: C
+  showtext: true
+bubbles:
+  unit: C
+  showtext: true
+ticks:
+  majorticks: 4
+  minorticks: 1
+```
+
+### Single-Handle Example
+
+```yaml
+type: custom:flex-slider-card
+name: Comfort target
+entities:
+  - entity: input_number.temperature_target
+min: 18
+max: 30
+step: 0.5
+valuesbaractive: true
+valuesbar:
+  unit: C
+```
+
+### Time Example
+
+```yaml
+type: custom:flex-slider-card
+name: Heating schedule
+entities:
+  - entity: input_datetime.heating_start
+    text: Start
+  - entity: input_datetime.heating_end
+    text: End
+valuesbaractive: true
+bubblesactive: true
+step: 15
+direction: ltr
+bubbles:
+  dragonly: true
+  showtext: true
+```
+
+Both `input_datetime` entities must be time-only (`has_time: true`, `has_date: false`).
+For this domain, `min` and `max` are ignored and `step` is rounded to whole minutes.
+
+### Cover Example
+
+```yaml
+type: custom:flex-slider-card
+name: Living room cover
+entities:
+  - entity: cover.living_room
+    text: Position
+min: 0
+max: 100
+step: 1
+bubblesactive: true
+bubbles:
+  unit: "%"
+  showtext: true
+```
+
+`cover` entities use the `current_position` attribute and are updated through the `cover.set_cover_position` service.
+The range must stay between `0` and `100`; sent positions are rounded to whole numbers.
+Multiple `cover` entities can be used when you intentionally want to compare or control several cover positions on the same scale.
+
+### Reference Entity Example
+
+```yaml
+type: custom:flex-slider-card
+name: Heating target
+entities:
+  - entity: input_number.temperature_min
+    text: Min
+  - entity: input_number.temperature_max
+    text: Max
+min: 18
+max: 30
+step: 0.5
+bubblesactive: true
+referenceactive: true
+reference:
+  entity: input_number.temperature_current
+  text: Current
+  bubble: true
+  valuesbar: false
+  unit: C
+```
+
+The reference entity is displayed as a read-only handle on the same slider scale.
+It must use a domain compatible with the slider entities.
+
+### Adaptive State Example
+
+```yaml
+type: custom:flex-slider-card
+name: Heating window
+entities:
+  - entity: input_number.heating_min
+    text: Min
+  - entity: input_number.heating_max
+    text: Max
+min: 18
+max: 24
+step: 0.5
+valuesbaractive: true
+adaptivestateactive: true
+adaptivestate:
+  conditions:
+    - condition: numeric_state
+      entity: sensor.current_temperature
+      below: 22
+  editablewhenlinkedinactive: false
+```
+
+When the adaptive state conditions are true, the card behaves normally.
+When they are false, the card is shown as inactive and the slider is disabled unless `editablewhenlinkedinactive: true` is set.
+
+Warning: depending on the layout and enabled slider decorations, the adaptive state LED can overlap the slider.
+
+### Vertical Example
+
+```yaml
+type: custom:flex-slider-card
+name: Temperature band
+entities:
+  - entity: input_number.temperature_min
+    text: Min
+  - entity: input_number.temperature_max
+    text: Max
+min: 18
+max: 30
+step: 0.5
+orientation: vertical
+verticalheight: 3
+verticallayout: mirrored
+bubblesactive: true
+ticksactive: true
+bubbles:
+  unit: C
+  showtext: true
+ticks:
+  majorticks: 5
+  minorticks: 2
+```
