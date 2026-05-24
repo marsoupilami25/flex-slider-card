@@ -52,17 +52,26 @@ Nevertheless legacy keys such as `entity_min`, `entity_max`, `valuesbar.mintext`
 
 ## Installation
 
-### HACS
+### HACS (recommended)
 
-1. Install [HACS](https://hacs.xyz/) if needed.
-2. Go to HACS > Frontend.
-3. Open the top-right menu and choose `Custom repositories`.
-4. Add `https://github.com/marsoupilami25/flex-slider-card` as a frontend repository.
-5. Search for `Flex Slider Card`.
-6. Install it.
-7. Restart Home Assistant if prompted.
+Flex Slider Card is available in the official HACS catalog.
 
-![Add custom repository](/assets/custom_repo.png)
+1. Install and configure [HACS](https://hacs.xyz/) if needed.
+2. In Home Assistant, go to HACS.
+3. Search for `Flex Slider Card`.
+4. Open the repository and click `Download`.
+5. Refresh your browser, or restart Home Assistant if HACS prompts you to.
+
+HACS installs the card as:
+
+```text
+/hacsfiles/flex-slider-card/flex-slider-card.js
+```
+
+HACS usually adds the dashboard resource automatically. If the card is not available after installation, add it manually from `Settings > Dashboards > Resources`:
+
+- URL: `/hacsfiles/flex-slider-card/flex-slider-card.js`
+- Resource type: `JavaScript module`
 
 ### Manual Installation
 
@@ -263,7 +272,8 @@ card_mod:
 If the card does not appear in Home Assistant:
 
 - Clear the browser cache or the Home Assistant app cache
-- Verify that `/local/flex-slider-card.js` is added as a dashboard resource
+- If installed with HACS, verify that `/hacsfiles/flex-slider-card/flex-slider-card.js` is added as a dashboard resource
+- If installed manually, verify that `/local/flex-slider-card.js` is added as a dashboard resource
 - Make sure the configured entities exist and use compatible domains
 - Check open issues or report a new one:
   https://github.com/marsoupilami25/flex-slider-card/issues
