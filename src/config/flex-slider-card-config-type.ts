@@ -208,6 +208,9 @@ export type FlexSliderCardConfig = LovelaceCardConfig &
 
   /* card mod */
   card_mod?: Record<string, unknown>;
+
+  /* UIX */
+  uix?: Record<string, unknown>;
 };
 export const flexSliderCardConfigStruct = assign(
   lovelaceCardConfigStruct,
