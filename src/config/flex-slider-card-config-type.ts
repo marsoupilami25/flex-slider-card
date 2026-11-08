@@ -206,6 +206,9 @@ export type FlexSliderCardConfig = LovelaceCardConfig &
   entity_max?: string;
   /* legacy entities configuration end */
 
+  /* Home Assistant disabled key */
+  disabled?: boolean;
+
   /* card mod */
   card_mod?: Record<string, unknown>;
 };
